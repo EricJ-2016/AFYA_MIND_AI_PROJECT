@@ -1,0 +1,1 @@
+cl { def App() -> any { return <div><h1>AFYA-MIND MVP</h1></div>; } }

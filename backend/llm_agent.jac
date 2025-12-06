@@ -1,0 +1,1 @@
+walker ai_feedback { has text: str; can entry { response = byllm(prompt=f"You are MentaBot. Summary: {self.text}"); report response; } }
