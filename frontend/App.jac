@@ -1,4 +1,4 @@
-cl { def App() -> any { return <div><h1>AFYA-MIND MVP</h1></div>; } }
+cl { def App() -> any { return <div><h1>AFYA-MIND</h1></div>; } }
 import {*} from react;
 
 cl app {
