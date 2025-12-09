@@ -1,0 +1,2 @@
+Extract ONE trigger word from: {{context}}
+Return only the word.
