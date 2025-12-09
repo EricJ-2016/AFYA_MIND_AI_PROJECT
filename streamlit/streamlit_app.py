@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Bubbles after every MentaBot reply + 4-message chat + Swahili + Full reset
+# Perfect flow + Bubbles + 4-message chat + Final message
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -24,7 +24,7 @@ GAD7 = [
     "Not being able to stop or control worrying?",
     "Worrying too much about different things?",
     "Trouble relaxing?",
-    "Being so restless that it's hard to sit still?",
+    "Being so restless that it is hard to sit still?",
     "Becoming easily annoyed or irritable?",
     "Feeling afraid as if something awful might happen?"
 ]
@@ -98,8 +98,7 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
     elif any(w in text for w in ["exam","study"]): trigger = "academic pressure"
     elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
 
-    # FIRST BUBBLES
-    st.balloons()
+    st.balloons()  # BUBBLES 1
 
     st.success(f"Score: {score} → {level}")
     st.info(f"Detected trigger: **{trigger.capitalize()}**")
@@ -110,40 +109,61 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 
 **Breathing exercise**: Inhale 4 → Hold 4 → Exhale 4 → Repeat 5 times.
 
-**Let’s talk — I’m here for you.**
+**Now tell me —**
     """)
 
-    # === 4-MESSAGE CHAT WITH BUBBLES AFTER EVERY REPLY ===
-    if "chat_count" not in st.session_state:
-        st.session_state.chat_count = 0
-        st.session_state.messages = []
+    # FIRST QUESTION FROM MENTABOT
+    user_happy = st.text_input(
+        "What is one small thing I can do today to feel 1% better?",
+        placeholder="Type anything and press Enter...",
+        key="first_happy"
+    )
 
-    # Show chat history
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    )
 
-    # Only allow 4 messages
-    if st.session_state.chat_count < 4:
-        if prompt := st.chat_input("Talk to MentaBot... (you have 4 messages)"):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+    if user_happy.strip():
+        st.balloons()  # BUBBLES 2
 
-            with st.chat_message("assistant"):
-                with st.spinner("MentaBot is thinking..."):
-                    # Simple mock response (replace with real GPT-4 if you have key)
-                    reply = f"Thank you for sharing. {prompt} Uko sawa, utapita hii."
-                st.markdown(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
-                st.session_state.chat_count += 1
+        # Personalized recovery
+        if "PHQ-9" in tool:
+            recovery = f"Doing **{user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression over time."
+        elif "GAD-7" in tool:
+            recovery = f"Choosing **{user_happy}** calms your nervous system and lowers anxiety naturally."
+        else:
+            recovery = f"Engaging in **{user_happy}** grounds you and reduces psychosis risk."
 
-                # BUBBLES AFTER EVERY MENTABOT REPLY
-                st.balloons()
+        st.success("**Uko sawa, utapita hii.**")
+        st.markdown(f"**{recovery}**")
+        st.markdown("**You are stronger than you know. I'm here to help you.**")
+        st.markdown("— MentaBot")
 
-    else:
-        st.success("**Thank you for talking. You are enough.**")
-        st.markdown("**Uko sawa. You're doing great.** — MentaBot")
+        # === 4-MESSAGE CHAT STARTS ===
+        if "chat_count" not in st.session_state:
+            st.session_state.chat_count = 0
+            st.session_state.messages = []
+
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        if st.session_state.chat_count < 4:
+            if prompt := st.chat_input("Talk to MentaBot... (4 messages left)"):
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+
+                with st.chat_message("assistant"):
+                    with st.spinner("MentaBot is thinking..."):
+                        reply = f"Thank you for sharing. {prompt} Uko sawa, utapita hii."
+                    st.markdown(reply)
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                    st.session_state.chat_count += 1
+
+                    st.balloons()  # BUBBLES AFTER EVERY REPLY
+
+        if st.session_state.get("chat_count", 0) >= 4:
+            st.success("**You are enough. Take care.**")
+            st.markdown("**Uko sawa. You're doing great.** — MentaBot")
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles after every MentaBot reply | Full Jac in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | 4-message chat | Full Jac in repo | Eric Jeremiah")
