@@ -117,5 +117,9 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
         st.markdown("— MentaBot")
 
+# Repetitive screening option (starts over)
+if st.button("Screen Again (New Session)"):
+    st.rerun()  # Resets the app to start fresh
+
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot | Swahili | Full Jac code in repo | Eric Jeremiah")
