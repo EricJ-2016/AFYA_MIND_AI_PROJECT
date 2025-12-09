@@ -5,3 +5,6 @@ backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0EFFF"
 textColor = "#262730"
 font = "sans serif"
+streamlit
+openai
+pillow==9.5.0
