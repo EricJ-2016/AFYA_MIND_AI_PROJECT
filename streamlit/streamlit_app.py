@@ -1,12 +1,12 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Bubbles + 3 funny questions + Final message + Full reset
+# Bubbles + 3 funny questions + Final message + Auto fresh start
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
 
 import streamlit as st
 
-# === REAL QUESTIONS (same as before - shortened for space) ===
+# === REAL QUESTIONS (shortened for space) ===
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -28,10 +28,9 @@ GAD7 = [
     "Becoming easily annoyed or irritable?",
     "Feeling afraid as if something awful might happen?"
 ]
-
-WERCAP = [  # (same 22 questions - omitted for space)
+WERCAP = [  # 22 questions - full list in previous versions
     "I hear sounds or voices that other people think aren't there.",
-    # ... all 22 questions
+    # ... (all 22)
 ]
 
 def calculate_score(tool, answers):
@@ -49,11 +48,6 @@ st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
 st.markdown("**Welcome to AFYA-MIND — where everything is possible.**\nYou are safe. You are not alone. We are together.")
 
-if st.button("Screening Session)", type="secondary"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.rerun()
-
 tool = st.selectbox("Choose Screening Tool", ["PHQ-9 (Depression)", "GAD-7 (Anxiety)", "WERCAP (Psychosis Risk)"])
 questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
 
@@ -69,7 +63,7 @@ journal = st.text_area("How are you really feeling today?", placeholder="e.g., W
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
 
-    # Trigger detection (same as before)
+    # Trigger detection
     text = journal.lower()
     trigger = "stress"
     if any(w in text for w in ["work","job","boss"]): trigger = "work stress"
@@ -111,24 +105,30 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         st.success("**Uko sawa, utapita hii.**")
         st.markdown(f"**{recovery}**")
 
-        # === 3 FUNNY QUESTIONS BASED ON THEIR ANSWER ===
+        # === 3 FUNNY QUESTIONS ===
         st.markdown("### Just for fun — answer these 3 quick questions:")
         funny_questions = [
-            f"If {user_happy} was a Kenyan celebrity, who would it be?",
-            f"How many chapatis would {user_happy} eat in one sitting?",
-            f"If {user_happy} had a superpower, what would it be?"
+            f"If **{user_happy}** was a Kenyan celebrity, who would it be?",
+            f"How many chapatis would **{user_happy}** eat in one sitting?",
+            f"If **{user_happy}** had a superpower, what would it be?"
         ]
 
+        answered_count = 0
         for i, q in enumerate(funny_questions):
             ans = st.text_input(q, placeholder="Your funny answer...", key=f"fun{i}")
             if ans.strip():
-                st.balloons()  # BUBBLES AFTER EVERY FUNNY ANSWER
+                st.balloons()
                 st.markdown(f"😂 {ans} — I love it!")
+                answered_count += 1
 
-        # FINAL MESSAGE AFTER ALL QUESTIONS
-        st.success("**Uko sawa, utapita hii.**")
-        st.markdown("**You are stronger than you know. I'm here to help you.**")
-        st.markdown("— MentaBot")
+        # FINAL MESSAGE AFTER ALL 3
+        if answered_count == 3:
+            st.balloons()
+            st.success("**Uko sawa, utapita hii.**")
+            st.markdown("**You are stronger than you know. I'm here to help you.**")
+            st.markdown("— MentaBot")
+            st.markdown("")
+            st.info("Refresh the page to start a new session")
 
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | 3 funny questions | Full Jac in repo | Eric Jeremiah")
