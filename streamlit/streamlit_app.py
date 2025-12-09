@@ -49,7 +49,7 @@ st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
 st.markdown("**Welcome to AFYA-MIND — where everything is possible.**\nYou are safe. You are not alone. We are together.")
 
-if st.button("Screen Again (New Session)", type="secondary"):
+if st.button("Screening Session)", type="secondary"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
