@@ -1,12 +1,12 @@
-# streamlit_app.py - AFYA-MIND FINAL VERSION (REAL QUESTIONS + NO ERRORS)
-# Judges will love this — clinically accurate, beautiful, working
+# streamlit_app.py - AFYA-MIND FINAL WINNER VERSION
+# Real PHQ-9 + GAD-7 + WERCAP + Interactive MentaBot + Swahili
 
 import os
-os.environ['PIL_AVIF_IGNORE'] = '1'  # Fixes Streamlit Cloud blank page
+os.environ['PIL_AVIF_IGNORE'] = '1'  # Fix Streamlit Cloud
 
 import streamlit as st
 
-# === REAL CLINICAL QUESTIONS (OFFICIAL) ===
+# === REAL CLINICAL QUESTIONS ===
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -54,63 +54,67 @@ WERCAP = [
     "I have felt that I have no thoughts or an empty mind."
 ]
 
-# Scoring function (fixed syntax)
 def calculate_score(tool, answers):
     score = sum(answers)
     if tool == "PHQ-9":
         level = "Minimal" if score <=4 else "Mild" if score <=9 else "Moderate" if score <=14 else "Moderately Severe" if score <=19 else "Severe"
     elif tool == "GAD-7":
         level = "Minimal" if score <=4 else "Mild" if score <=9 else "Moderate" if score <=14 else "Severe Anxiety"
-    else:  # WERCAP
+    else:
         level = "Low Risk" if score <=20 else "Moderate Risk" if score <=40 else "High Risk"
     return score, level
 
-# MentaBot response
-def mentabot(score, level, trigger):
-    return f"""
-**Pole sana rafiki** — I see you scored **{score}** ({level}).
-
-Your main trigger today: **{trigger.capitalize()}**
-
-**Breathing exercise**: Inhale 4 seconds → Hold 4 → Exhale 4 → Repeat 5 times.
-
-**Journal prompt**: "What is one small thing I can do today to feel 1% better?"
-
-**Uko sawa, utapita hii.**  
-You are stronger than you know. I'm here whenever you need me.
-
-— MentaBot
-"""
-
-# === STREAMLIT APP ===
-st.set_page_config(page_title="AFYA-MIND", page_icon="Brain", layout="centered")
-
-st.title("Brain AFYA-MIND")
+# === MAIN APP ===
+st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
+st.title("AFYA-MIND")
 st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
 
 tool = st.selectbox("Choose Screening Tool", ["PHQ-9 (Depression)", "GAD-7 (Anxiety)", "WERCAP (Psychosis Risk)"])
-
 questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
 
-st.markdown("### Over the last 2 weeks, how often have you been bothered by:")
+st.markdown("### Over the last 2 weeks, how often have you been bothered by the following?")
 answers = []
 for i, q in enumerate(questions):
-    val = st.radio(q, ["Not at all (0)", "Several days (1)", "More than half the days (2)", "Nearly every day (3)"], 
+    val = st.radio(q, ["Not at all (0)", "Several days (1)", "More than half the days (2)", "Nearly every day (3)"],
                    index=0, horizontal=True, key=f"q{i}")
-    answers.append([0,1,2,3][["Not at all", "Several days", "More than half", "Nearly every day"].index(val.split("(")[0].strip())])
+    answers.append([0,1,2,3][["Not at all","Several days","More than half","Nearly every day"].index(val.split("(")[0].strip())])
 
-journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family issues...")
+journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family pressure, exam fear...")
 
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
-    
-    trigger = "work" if "work" in journal.lower() else "family" if "family" in journal.lower() else "stress"
-    
+
+    # REAL trigger detection from what user typed
+    text = journal.lower()
+    trigger = "unknown"
+    if any(word in text for word in ["work", "job", "boss", "deadline"]): trigger = "work"
+    elif any(word in text for word in ["family", "parent", "child", "spouse"]): trigger = "family"
+    elif any(word in text for word in ["money", "bills", "debt"]): trigger = "finances"
+    elif any(word in text for word in ["exam", "school", "study", "grades"]): trigger = "academic"
+    elif any(word in text for word in ["friend", "relationship", "breakup"]): trigger = "relationships"
+    elif text: trigger = text.split()[0]  # first word if nothing matches
+
     st.success(f"Score: {score} → {level}")
     st.info(f"Detected trigger: **{trigger.capitalize()}**")
-    st.markdown("### Brain MentaBot Says:")
-    st.info(mentabot(score, level, trigger))
-    st.balloons()
+
+    st.subheader("MentaBot is here for you")
+    st.write(f"""
+**Pole sana rafiki** — I hear you're carrying **{trigger}** today. That’s heavy, and it’s okay to feel it.
+
+**Breathing exercise**: Inhale 4 → Hold 4 → Exhale 4 → Repeat 5 times.
+
+**Journal prompt**:  
+*What is one small thing I can do today to feel 1% better?*
+    """)
+
+    # INTERACTIVE JOURNALING — USER TYPES ANSWER
+    user_answer = st.text_input("Type your answer here and press Enter:", key="journal_answer")
+
+    if user_answer:
+        st.balloons()
+        st.success("Umepita hii! Uko sawa sasa")
+        st.write("**You are stronger than you know. I'm here whenever you need me.**")
+        st.write("— MentaBot")
 
 st.markdown("---")
-st.caption("Real clinical questions | Swahili support | Full Jac + OSP + byLLM in GitHub repo")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Swahili support | Interactive MentaBot | Full Jac + OSP + byLLM in GitHub")
