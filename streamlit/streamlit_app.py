@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Bubbles twice + Final message stays + Personalized recovery + Full reset
+# Bubbles twice + Perfect flow + Personalized recovery + Full reset
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -69,7 +69,7 @@ st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
 st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
 
-# FULL RESET BUTTON
+# FULL RESET
 if st.button("Screen Again (New Session)", type="secondary"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
@@ -120,19 +120,19 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         key="hope_answer"
     )
 
-    # SECOND BUBBLES + FINAL MESSAGE WHEN USER TYPES
     if user_answer.strip():
-        st.balloons()  # BUBBLES AGAIN!
-        st.success("**Uko sawa, utapita hii.**")
+        # SECOND BUBBLES
+        st.balloons()
 
-        # PERSONALIZED RECOVERY MESSAGE BASED ON TOOL
+        # PERSONALIZED RECOVERY MESSAGE
         if "PHQ-9" in tool:
-            recovery = f"Doing **{user_answer}** is a powerful step. Small actions like this are proven to lift mood and reduce depression over time. You're building hope, one moment at a time."
+            recovery = f"Doing **{user_answer}** is a beautiful step. Small actions like this are proven to lift mood and reduce depression over time. You're building hope, one moment at a time."
         elif "GAD-7" in tool:
-            recovery = f"Choosing **{user_answer}** helps calm your nervous system and lowers anxiety naturally. You're taking back control — and that’s incredibly strong."
+            recovery = f"Choosing **{user_answer}** helps calm your nervous system and lowers anxiety naturally. You're taking back control — and that’s powerful."
         else:  # WERCAP
-            recovery = f"Engaging in **{user_answer}** helps ground you in the present and strengthens your sense of reality. Every positive action reduces risk and brings clarity."
+            recovery = f"Engaging in **{user_answer}** helps ground you in the present and strengthens your sense of reality. Every positive action reduces psychosis risk and brings clarity."
 
+        st.success("**Uko sawa, utapita hii.**")
         st.markdown(f"**{recovery}**")
         st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
         st.markdown("— MentaBot")
