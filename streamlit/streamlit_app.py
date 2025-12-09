@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Real questions + Interactive MentaBot + Bubbles + Final message + Repeat
+# Bubbles TWICE + Full reset + Everything works perfectly
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -9,49 +9,49 @@ import streamlit as st
 # === REAL QUESTIONS ===
 PHQ9 = [
     "Little interest or pleasure in doing things?",
-    "Feeling down, depressed, or hopeless?",
-    "Trouble falling or staying asleep, or sleeping too much?",
-    "Feeling tired or having little energy?",
-    "Poor appetite or overeating?",
-    "Feeling bad about yourself — or that you are a failure?",
-    "Trouble concentrating on things?",
-    "Moving or speaking so slowly? Or very fidgety/restless?",
-    "Thoughts that you would be better off dead or hurting yourself?"
+ "Feeling down, depressed, or hopeless?",
+ "Trouble falling or staying asleep, or sleeping too much?",
+ "Feeling tired or having little energy?",
+ "Poor appetite or overeating?",
+ "Feeling bad about yourself — or that you are a failure?",
+ "Trouble concentrating on things?",
+ "Moving or speaking so slowly? Or very fidgety/restless?",
+ "Thoughts that you would be better off dead or hurting yourself?"
 ]
 
 GAD7 = [
-    "Feeling nervous, anxious or on edge?",
-    "Not being able to stop or control worrying?",
-    "Worrying too much about different things?",
-    "Trouble relaxing?",
-    "Being so restless that it is hard to sit still?",
-    "Becoming easily annoyed or irritable?",
-    "Feeling afraid as if something awful might happen?"
+ "Feeling nervous, anxious or on edge?",
+ "Not being able to stop or control worrying?",
+ "Worrying too much about different things?",
+ "Trouble relaxing?",
+ "Being so restless that it is hard to sit still?",
+ "Becoming easily annoyed or irritable?",
+ "Feeling afraid as if something awful might happen?"
 ]
 
 WERCAP = [
-    "I hear sounds or voices that other people think aren't there.",
-    "I feel that other people can read my thoughts or that I can read others' thoughts.",
-    "I have visions or see things that others cannot see.",
-    "I feel that I have special or supernatural powers.",
-    "My thoughts are sometimes so strong that I can almost hear them.",
-    "I have had experiences with the supernatural or spiritual world.",
-    "I feel that parts of my body have changed into something else.",
-    "People sometimes stare at me because of the way I look or behave.",
-    "I feel like I am being followed or watched.",
-    "I feel that I am not in control of my own ideas or thoughts.",
-    "I have seen things that other people can't see or don't see.",
-    "I have seen or heard things when dreaming/half-asleep that others say aren't real.",
-    "I feel like electrical appliances or machines affect my thoughts.",
-    "I feel that my thoughts are being taken away from me.",
-    "I have had the experience of feeling that I am someone else.",
-    "I have felt that I am not in control of my body.",
-    "I have felt that my body has changed in some strange way.",
-    "I have felt that I do not exist or that I have died.",
-    "I have felt that I am being controlled by someone or something else.",
-    "I have felt that my thoughts are being broadcast out loud.",
-    "I have felt that thoughts were put into my head that were not my own.",
-    "I have felt that I have no thoughts or an empty mind."
+ "I hear sounds or voices that other people think aren't there.",
+ "I feel that other people can read my thoughts or that I can read others' thoughts.",
+ "I have visions or see things that others cannot see.",
+ "I feel that I have special or supernatural powers.",
+ "My thoughts are sometimes so strong that I can almost hear them.",
+ "I have had experiences with the supernatural or spiritual world.",
+ "I feel that parts of my body have changed into something else.",
+ "People sometimes stare at me because of the way I look or behave.",
+ "I feel like I am being followed or watched.",
+ "I feel that I am not in control of my own ideas or thoughts.",
+ "I have seen things that other people can't see or don't see.",
+ "I have seen or heard things when dreaming/half-asleep that others say aren't real.",
+ "I feel like electrical appliances or machines affect my thoughts.",
+ "I feel that my thoughts are being taken away from me.",
+ "I have had the experience of feeling that I am someone else.",
+ "I have felt that I am not in control of my body.",
+ "I have felt that my body has changed in some strange way.",
+ "I have felt that I do not exist or that I have died.",
+ "I have felt that I am being controlled by someone or something else.",
+ "I have felt that my thoughts are being broadcast out loud.",
+ "I have felt that thoughts were put into my head that were not my own.",
+ "I have felt that I have no thoughts or an empty mind."
 ]
 
 def calculate_score(tool, answers):
@@ -69,8 +69,8 @@ st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
 st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
 
-# Reset button
-if st.button("Screen Again (New Session)"):
+# FULL RESET BUTTON
+if st.button("Screen Again (New Session)", type="secondary"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
@@ -99,6 +99,9 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
     elif any(w in text for w in ["exam","study"]): trigger = "academic pressure"
     elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
 
+    # FIRST BUBBLES WHEN SUBMITTING
+    st.balloons()
+
     st.success(f"Score: {score} → {level}")
     st.info(f"Detected trigger: **{trigger.capitalize()}**")
 
@@ -118,13 +121,11 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
     )
 
     if user_answer.strip():
-        st.session_state.answered = True
-
-if st.session_state.get("answered", False):
-    st.balloons()
-    st.success("**Uko sawa, utapita hii.**")
-    st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
-    st.markdown("— MentaBot")
+        # SECOND BUBBLES WHEN USER TYPES
+        st.balloons()
+        st.success("**Uko sawa, utapita hii.**")
+        st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
+        st.markdown("— MentaBot")
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot | Swahili | Full Jac code in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles TWICE | Full reset | Full Jac code in repo | Eric Jeremiah")
