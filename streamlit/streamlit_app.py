@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Welcome message + Bubbles twice + Personalized + Full reset
+# Bubbles twice + 4-message GPT-style chat after screening + Swahili + Full reset
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -67,17 +67,10 @@ def calculate_score(tool, answers):
 # === APP ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
-st.markdown("""
-**Welcome to AFYA-MIND — where everything is possible.**  
-I request you can screen your participant or yourself and feel free — everything is well.  
-We are together in every case.  
-You are safe here. You are not alone.
-""")
+st.markdown("**Welcome to AFYA-MIND — where everything is possible.**\nYou are safe. You are not alone. We are together.")
 
-st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
-
-# FULL RESET
-if st.button("Screen Again (New Session)", type="secondary"):
+# RESET BUTTON
+if st.button("Screen Again (New Session)"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
@@ -97,7 +90,7 @@ journal = st.text_area("How are you really feeling today?", placeholder="e.g., W
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
 
-    # Real trigger detection
+    # Trigger detection
     text = journal.lower()
     trigger = "stress"
     if any(w in text for w in ["work","job","boss"]): trigger = "work stress"
@@ -131,18 +124,45 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         # SECOND BUBBLES
         st.balloons()
 
-        # PERSONALIZED RECOVERY MESSAGE
+        # Personalized recovery
         if "PHQ-9" in tool:
-            recovery = f"Doing **{user_answer}** is a beautiful step. Small actions like this are proven to lift mood and reduce depression over time. You're building hope, one moment at a time."
+            recovery = f"Doing **{user_answer}** is a beautiful step. Small actions like this lift mood and reduce depression."
         elif "GAD-7" in tool:
-            recovery = f"Choosing **{user_answer}** helps calm your nervous system and lowers anxiety naturally. You're taking back control — and that’s powerful."
-        else:  # WERCAP
-            recovery = f"Engaging in **{user_answer}** helps ground you in the present and strengthens your sense of reality. Every positive action reduces psychosis risk and brings clarity."
+            recovery = f"Choosing **{user_answer}** calms your nervous system and lowers anxiety naturally."
+        else:
+            recovery = f"Engaging in **{user_answer}** grounds you and reduces psychosis risk."
 
         st.success("**Uko sawa, utapita hii.**")
         st.markdown(f"**{recovery}**")
         st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
         st.markdown("— MentaBot")
 
+        # === 4-MESSAGE CHAT STARTS HERE ===
+        st.markdown("### Talk more with MentaBot (4 messages)")
+        if "chat_count" not in st.session_state:
+            st.session_state.chat_count = 0
+            st.session_state.messages = []
+
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        if st.session_state.chat_count < 4:
+            if prompt := st.chat_input("Say anything to MentaBot..."):
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+
+                with st.chat_message("assistant"):
+                    with st.spinner("MentaBot is thinking..."):
+                        reply = f"Thank you for sharing. {prompt} Uko sawa, utapita hii."
+                    st.markdown(reply)
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                    st.session_state.chat_count += 1
+                    st.rerun()
+        else:
+            st.success("Thank you for talking. You are enough. Take care.")
+            st.markdown("**Uko sawa. You're doing great.** — MentaBot")
+
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles twice | Personalized recovery | Full Jac code in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | 4-message MentaBot chat | Bubbles | Full Jac in repo | Eric Jeremiah")
