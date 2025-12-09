@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# BUBBLES + FINAL MESSAGE + REPEAT — WORKS ON STREAMLIT CLOUD
+# Real questions + Interactive MentaBot + Bubbles + Final message + Repeat
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -69,7 +69,7 @@ st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
 st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
 
-# Reset session if user clicks "Screen Again"
+# Reset button
 if st.button("Screen Again (New Session)"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
@@ -111,7 +111,6 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 **Now tell me —**
     """)
 
-    # INTERACTIVE — USER TYPES → BUBBLES + FINAL MESSAGE (NOW WORKS!)
     user_answer = st.text_input(
         "What is one small thing I can do today to feel 1% better?",
         placeholder="Type anything and press Enter...",
@@ -119,13 +118,13 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
     )
 
     if user_answer.strip():
-        st.session_state.show_final = True  # Remember we answered
+        st.session_state.answered = True
 
-    if st.session_state.get("show_final", False):
-        st.balloons()  # BUBBLES!
-        st.success("**Uko sawa, utapita hii.**
-        st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
-        st.markdown("— MentaBot")
+if st.session_state.get("answered", False):
+    st.balloons()
+    st.success("**Uko sawa, utapita hii.**")
+    st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
+    st.markdown("— MentaBot")
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot with Swahili & bubbles | Full Jac code in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot | Swahili | Full Jac code in repo | Eric Jeremiah")
