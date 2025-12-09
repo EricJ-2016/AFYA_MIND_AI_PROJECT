@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Real questions + Interactive MentaBot + Bubbles + Final message stays forever
+# Works 100% on Streamlit Cloud — no errors, bubbles, repeat
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -15,7 +15,7 @@ PHQ9 = [
     "Poor appetite or overeating?",
     "Feeling bad about yourself — or that you are a failure?",
     "Trouble concentrating on things?",
-    "Moving or speaking so slowly that others noticed? Or very fidgety/restless?",
+    "Moving or speaking so slowly? Or very fidgety/restless?",
     "Thoughts that you would be better off dead or hurting yourself?"
 ]
 
@@ -75,9 +75,9 @@ questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
 st.markdown("### Over the last 2 weeks, how often have you been bothered by:")
 answers = []
 for i, q in enumerate(questions):
-    val = st.radio(q, ["Not at all (0)", "Several days (1)", "More than half the days (2)", "Nearly every day (3)"],
+    val = st.radio(q, ["Not at all", "Several days", "More than half the days", "Nearly every day"],
                    index=0, horizontal=True, key=f"q{i}")
-    answers.append([0,1,2,3][["Not at all","Several days","More than half","Nearly every day"].index(val.split("(")[0].strip())])
+    answers.append(["Not at all", "Several days", "More than half the days", "Nearly every day"].index(val))
 
 journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family pressure...")
 
@@ -107,19 +107,19 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 
     user_answer = st.text_input(
         "What is one small thing I can do today to feel 1% better?",
-        placeholder="Type anything here and press Enter...",
+        placeholder="Type anything and press Enter...",
         key="hope_answer"
     )
 
     if user_answer.strip():
-        st.balloons()  # BUBBLES!
+        st.balloons()
         st.success("**Uko sawa, utapita hii.**")
         st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
         st.markdown("— MentaBot")
 
-# Repetitive screening option (starts over)
+# REPEAT SCREENING BUTTON
 if st.button("Screen Again (New Session)"):
-    st.rerun()  # Resets the app to start fresh
+    st.rerun()
 
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot | Swahili | Full Jac code in repo | Eric Jeremiah")
