@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Works 100% — Bubbles twice + Final message stays + Perfect flow
+# Welcome message + Bubbles twice + Personalized + Full reset
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -34,7 +34,7 @@ WERCAP = [
     "I feel that other people can read my thoughts or that I can read others' thoughts.",
     "I have visions or see things that others cannot see.",
     "I feel that I have special or supernatural powers.",
-    "My thoughts are sometimes so strong enough to hear them.",
+    "My thoughts are sometimes so strong that I can almost hear them.",
     "I have had experiences with the supernatural or spiritual world.",
     "I feel that parts of my body have changed into something else.",
     "People sometimes stare at me because of the way I look or behave.",
@@ -67,6 +67,13 @@ def calculate_score(tool, answers):
 # === APP ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
+st.markdown("""
+**Welcome to AFYA-MIND — where everything is possible.**  
+I request you can screen your participant or yourself and feel free — everything is well.  
+We are together in every case.  
+You are safe here. You are not alone.
+""")
+
 st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
 
 # FULL RESET
@@ -114,16 +121,15 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 **Now tell me —**
     """)
 
-    # USER TYPES THEIR HAPPY THING
     user_answer = st.text_input(
         "What is one small thing I can do today to feel 1% better?",
         placeholder="Type anything and press Enter...",
         key="hope_answer"
     )
 
-    # WHEN USER TYPES → SHOW BUBBLES + FINAL MESSAGE (STAYS FOREVER)
     if user_answer.strip():
-        st.balloons()  # SECOND BUBBLES
+        # SECOND BUBBLES
+        st.balloons()
 
         # PERSONALIZED RECOVERY MESSAGE
         if "PHQ-9" in tool:
