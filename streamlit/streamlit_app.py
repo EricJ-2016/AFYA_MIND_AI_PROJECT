@@ -1,8 +1,8 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Real questions + Real trigger + Interactive MentaBot + Swahili + Balloons
+# Real clinical tools + Interactive MentaBot + Swahili + Bubbles when user answers
 
 import os
-os.environ['PIL_AVIF_IGNORE'] = '1'  # Fixes Streamlit Cloud
+os.environ['PIL_AVIF_IGNORE'] = '1'
 
 import streamlit as st
 
@@ -84,15 +84,23 @@ journal = st.text_area("How are you really feeling today?", placeholder="e.g., W
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
 
-    # REAL trigger detection from journal
+    # REAL trigger detection
     text = journal.lower()
     trigger = "unknown"
-    if any(w in text for w in ["work","job","boss","deadline"]): trigger = "work stress"
-    elif any(w in text for w in ["family","parent","child","spouse"]): trigger = "family"
-    elif any(w in text for w in ["money","bill","debt"]): trigger = "finances"
-    elif any(w in text for w in ["exam","school","study","grade"]): trigger = "academic pressure"
-    elif any(w in text for w in ["friend","relationship","breakup"]): trigger = "relationships"
-    elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
+    triggers = {
+        "work": "stress",
+        "work": "work stress", "job": "work stress", "boss": "work stress",
+        "family": "family", "parent": "family", "child": "family",
+        "money": "finances", "bill": "finances",
+        "exam": "academic pressure", "school": "academic pressure",
+        "friend": "relationships", "love": "relationships"
+    }
+    for word, name in triggers.items():
+        if word in text:
+            trigger = name
+            break
+    if trigger == "unknown" and journal.strip():
+        trigger = journal.strip().split()[0] + " concern"
 
     st.success(f"Score: {score} → {level}")
     st.info(f"Detected trigger: **{trigger.capitalize()}**")
@@ -106,18 +114,18 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 **Now tell me —**
     """)
 
-    # INTERACTIVE JOURNALING
-    user_journal_answer = st.text_input(
+    # INTERACTIVE PART — USER TYPES → BUBBLES + FINAL MESSAGE
+    user_answer = st.text_input(
         "What is one small thing I can do today to feel 1% better?",
         placeholder="Type anything here and press Enter...",
-        key="final_answer"
+        key="hope_answer"
     )
 
-    if user_journal_answer.strip():
-        st.balloons()
+    if user_answer.strip():
+        st.balloons()  # BUBBLES APPEAR!
         st.success("**Uko sawa, utapita hii.**")
         st.write("**You are stronger than you know. I'm here whenever you need me.**")
         st.write("— MentaBot")
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Real trigger detection | Interactive Swahili MentaBot | Full Jac version in GitHub")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot | Swahili | Full Jac code in GitHub | Eric Jeremiah")
