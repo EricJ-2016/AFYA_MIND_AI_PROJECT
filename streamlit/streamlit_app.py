@@ -1,19 +1,58 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Real screening + GPT-4 chat with MentaBot + Swahili + Bubbles twice
+# Welcome message + Bubbles twice + Personalized + Full reset
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
 
 import streamlit as st
-from openai import OpenAI
-
-# === CONFIG ===
-client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY")))
 
 # === REAL QUESTIONS ===
-PHQ9 = ["Little interest or pleasure in doing things?", ...]  # (same as before)
-GAD7 = [...]  # (same)
-WERCAP = [...]  # (same)
+PHQ9 = [
+    "Little interest or pleasure in doing things?",
+    "Feeling down, depressed, or hopeless?",
+    "Trouble falling or staying asleep, or sleeping too much?",
+    "Feeling tired or having little energy?",
+    "Poor appetite or overeating?",
+    "Feeling bad about yourself — or that you are a failure?",
+    "Trouble concentrating on things?",
+    "Moving or speaking so slowly? Or very fidgety/restless?",
+    "Thoughts that you would be better off dead or hurting yourself?"
+]
+
+GAD7 = [
+    "Feeling nervous, anxious or on edge?",
+    "Not being able to stop or control worrying?",
+    "Worrying too much about different things?",
+    "Trouble relaxing?",
+    "Being so restless that it is hard to sit still?",
+    "Becoming easily annoyed or irritable?",
+    "Feeling afraid as if something awful might happen?"
+]
+
+WERCAP = [
+    "I hear sounds or voices that other people think aren't there.",
+    "I feel that other people can read my thoughts or that I can read others' thoughts.",
+    "I have visions or see things that others cannot see.",
+    "I feel that I have special or supernatural powers.",
+    "My thoughts are sometimes so strong that I can almost hear them.",
+    "I have had experiences with the supernatural or spiritual world.",
+    "I feel that parts of my body have changed into something else.",
+    "People sometimes stare at me because of the way I look or behave.",
+    "I feel like I am being followed or watched.",
+    "I feel that I am not in control of my own ideas or thoughts.",
+    "I have seen things that other people can't see or don't see.",
+    "I have seen or heard things when dreaming/half-asleep that others say aren't real.",
+    "I feel like electrical appliances or machines affect my thoughts.",
+    "I feel that my thoughts are being taken away from me.",
+    "I have had the experience of feeling that I am someone else.",
+    "I have felt that I am not in control of my body.",
+    "I have felt that my body has changed in some strange way.",
+    "I have felt that I do not exist or that I have died.",
+    "I have felt that I am being controlled by someone or something else.",
+    "I have felt that my thoughts are being broadcast out loud.",
+    "I have felt that thoughts were put into my head that were not my own.",
+    "I have felt that I have no thoughts or an empty mind."
+]
 
 def calculate_score(tool, answers):
     score = sum(answers)
@@ -28,10 +67,17 @@ def calculate_score(tool, answers):
 # === APP ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 st.title("AFYA-MIND")
-st.markdown("**Welcome to AFYA-MIND — where everything is possible.**\nYou are safe. You are not alone. We are together.")
+st.markdown("""
+**Welcome to AFYA-MIND — where everything is possible.**  
+I request you can screen your participant or yourself and feel free — everything is well.  
+We are together in every case.  
+You are safe here. You are not alone.
+""")
 
-# Reset
-if st.button("Screen Again (New Session)"):
+st.markdown("**Jaseci Hackathon 2025 – Project 5** | Eric Jeremiah | [GitHub](https://github.com/EricJ-2016/AFYA_MIND_AI)")
+
+# FULL RESET
+if st.button("Screen Again (New Session)", type="secondary"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
@@ -51,16 +97,17 @@ journal = st.text_area("How are you really feeling today?", placeholder="e.g., W
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
 
-    # Trigger detection
-    trigger = "stress"
+    # Real trigger detection
     text = journal.lower()
-    if any(w in text for w in ["work","job"]): trigger = "work stress"
-    elif any(w in text for w in ["family","parent"]): trigger = "family"
+    trigger = "stress"
+    if any(w in text for w in ["work","job","boss"]): trigger = "work stress"
+    elif any(w in text for w in ["family","parent","child"]): trigger = "family"
     elif any(w in text for w in ["money","bill"]): trigger = "finances"
     elif any(w in text for w in ["exam","study"]): trigger = "academic pressure"
     elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
 
-    st.balloons()  # FIRST BUBBLES
+    # FIRST BUBBLES
+    st.balloons()
 
     st.success(f"Score: {score} → {level}")
     st.info(f"Detected trigger: **{trigger.capitalize()}**")
@@ -71,36 +118,31 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 
 **Breathing exercise**: Inhale 4 → Hold 4 → Exhale 4 → Repeat 5 times.
 
-**Now let’s talk — I’m here for you.**
+**Now tell me —**
     """)
 
-    # === GPT-4 CHAT STARTS HERE ===
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "system", "content": "You are MentaBot — a warm, compassionate, Kenyan mental health companion. Always respond in simple English with one line of Swahili. Be hopeful, never give medical advice, encourage small steps. End every reply with 'Uko sawa, utapita hii.'"}
-        ]
+    user_answer = st.text_input(
+        "What is one small thing I can do today to feel 1% better?",
+        placeholder="Type anything and press Enter...",
+        key="hope_answer"
+    )
 
-    for msg in st.session_state.messages[1:]:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    if user_answer.strip():
+        # SECOND BUBBLES
+        st.balloons()
 
-    if prompt := st.chat_input("Talk to MentaBot... (type anything)"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        # PERSONALIZED RECOVERY MESSAGE
+        if "PHQ-9" in tool:
+            recovery = f"Doing **{user_answer}** is a beautiful step. Small actions like this are proven to lift mood and reduce depression over time. You're building hope, one moment at a time."
+        elif "GAD-7" in tool:
+            recovery = f"Choosing **{user_answer}** helps calm your nervous system and lowers anxiety naturally. You're taking back control — and that’s powerful."
+        else:  # WERCAP
+            recovery = f"Engaging in **{user_answer}** helps ground you in the present and strengthens your sense of reality. Every positive action reduces psychosis risk and brings clarity."
 
-        with st.chat_message("assistant"):
-            with st.spinner("MentaBot is thinking..."):
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",  # or gpt-4-turbo
-                    messages=st.session_state.messages,
-                    temperature=0.8
-                )
-            reply = response.choices[0].message.content
-            st.markdown(reply)
-            st.session_state.messages.append({"role": "assistant", "content": reply})
-
-        st.balloons()  # SECOND BUBBLES EVERY TIME USER SENDS MESSAGE
+        st.success("**Uko sawa, utapita hii.**")
+        st.markdown(f"**{recovery}**")
+        st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
+        st.markdown("— MentaBot")
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | GPT-4 MentaBot Chat | Swahili | Full Jac in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles twice | Personalized recovery | Full Jac code in repo | Eric Jeremiah")
