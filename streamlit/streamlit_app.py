@@ -1,12 +1,12 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Bubbles + 3 funny questions + Final message + Auto fresh start
+# Login page + Full screening + Bubbles + 3 funny questions + Final message
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
 
 import streamlit as st
 
-# === REAL QUESTIONS (shortened for space) ===
+# === REAL QUESTIONS ===
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -28,9 +28,30 @@ GAD7 = [
     "Becoming easily annoyed or irritable?",
     "Feeling afraid as if something awful might happen?"
 ]
-WERCAP = [  # 22 questions - full list in previous versions
+
+WERCAP = [
     "I hear sounds or voices that other people think aren't there.",
-    # ... (all 22)
+    "I feel that other people can read my thoughts or that I can read others' thoughts.",
+    "I have visions or see things that others cannot see.",
+    "I feel that I have special or supernatural powers.",
+    "My thoughts are sometimes so strong that I can almost hear them.",
+    "I have had experiences with the supernatural or spiritual world.",
+    "I feel that parts of my body have changed into something else.",
+    "People sometimes stare at me because of the way I look or behave.",
+    "I feel like I am being followed or watched.",
+    "I feel that I am not in control of my own ideas or thoughts.",
+    "I have seen things that other people can't see or don't see.",
+    "I have seen or heard things when dreaming/half-asleep that others say aren't real.",
+    "I feel like electrical appliances or machines affect my thoughts.",
+    "I feel that my thoughts are being taken away from me.",
+    "I have had the experience of feeling that I am someone else.",
+    "I have felt that I am not in control of my body.",
+    "I have felt that my body has changed in some strange way.",
+    "I have felt that I do not exist or that I have died.",
+    "I have felt that I am being controlled by someone or something else.",
+    "I have felt that my thoughts are being broadcast out loud.",
+    "I have felt that thoughts were put into my head that were not my own.",
+    "I have felt that I have no thoughts or an empty mind."
 ]
 
 def calculate_score(tool, answers):
@@ -45,85 +66,100 @@ def calculate_score(tool, answers):
 
 # === APP ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
-st.title("AFYA-MIND")
-st.markdown("**Welcome to AFYA-MIND — where everything is possible.**\nYou are safe. You are not alone. We are together.")
 
-tool = st.selectbox("Choose Screening Tool", ["PHQ-9 (Depression)", "GAD-7 (Anxiety)", "WERCAP (Psychosis Risk)"])
-questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
+# LOGIN PAGE
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-st.markdown("### Over the last 2 weeks, how often have you been bothered by:")
-answers = []
-for i, q in enumerate(questions):
-    val = st.radio(q, ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-                   index=0, horizontal=True, key=f"q{i}")
-    answers.append(["Not at all", "Several days", "More than half the days", "Nearly every day"].index(val))
+if not st.session_state.logged_in:
+    st.title("Welcome to AFYA-MIND")
+    st.markdown("**Where everything is possible. You are safe. You are not alone.**")
+    st.markdown("Please enter your name to begin your healing journey")
+    
+    name = st.text_input("Your Name", placeholder="e.g., Eric, Amina, John...")
+    if st.button("Start My Journey", type="primary"):
+        if name.strip():
+            st.session_state.logged_in = True
+            st.session_state.user_name = name.strip()
+            st.rerun()
+        else:
+            st.error("Please enter your name")
+else:
+    st.title(f"Welcome back, {st.session_state.user_name} ")
+    st.markdown("**You are safe here. Let's begin.**")
 
-journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family pressure...")
+    tool = st.selectbox("Choose Screening Tool", ["PHQ-9 (Depression)", "GAD-7 (Anxiety)", "WERCAP (Psychosis Risk)"])
+    questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
 
-if st.button("Submit & Talk to MentaBot", type="primary"):
-    score, level = calculate_score(tool.split()[0], answers)
+    st.markdown("### Over the last 2 weeks, how often have you been bothered by:")
+    answers = []
+    for i, q in enumerate(questions):
+        val = st.radio(q, ["Not at all", "Several days", "More than half the days", "Nearly every day"],
+                       index=0, horizontal=True, key=f"q{i}")
+        answers.append(["Not at all", "Several days", "More than half the days", "Nearly every day"].index(val))
 
-    # Trigger detection
-    text = journal.lower()
-    trigger = "stress"
-    if any(w in text for w in ["work","job","boss"]): trigger = "work stress"
-    elif any(w in text for w in ["family","parent","child"]): trigger = "family"
-    elif any(w in text for w in ["money","bill"]): trigger = "finances"
-    elif any(w in text for w in ["exam","study"]): trigger = "academic pressure"
-    elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
+    journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family pressure...")
 
-    st.balloons()  # BUBBLES 1
+    if st.button("Submit & Talk to MentaBot", type="primary"):
+        score, level = calculate_score(tool.split()[0], answers)
 
-    st.success(f"Score: {score} → {level}")
-    st.info(f"Detected trigger: **{trigger.capitalize()}**")
+        # Trigger detection
+        text = journal.lower()
+        trigger = "stress"
+        if any(w in text for w in ["work","job","boss"]): trigger = "work stress"
+        elif any(w in text for w in ["family","parent","child"]): trigger = "family"
+        elif any(w in text for w in ["money","bill"]): trigger = "finances"
+        elif any(w in text for w in ["exam","study"]): trigger = "academic pressure"
+        elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
 
-    st.subheader("MentaBot is here for you")
-    st.write(f"""
-**Pole sana rafiki** — I see you're carrying **{trigger}** today.
+        st.balloons()  # BUBBLES 1
+
+        st.success(f"Score: {score} → {level}")
+        st.info(f"Detected trigger: **{trigger.capitalize()}**")
+
+        st.subheader("MentaBot is here for you")
+        st.write(f"""
+**Pole sana {st.session_state.user_name}** — I see you're carrying **{trigger}** today.
 
 **Breathing exercise**: Inhale 4 → Hold 4 → Exhale 4 → Repeat 5 times.
 
 **Now tell me —**
-    """)
+        """)
 
-    user_happy = st.text_input(
-        "What is one small thing I can do today to feel 1% better?",
-        placeholder="Type anything and press Enter...",
-        key="first_happy"
-    )
+        user_happy = st.text_input(
+            "What is one small thing I can do today to feel 1% better?",
+            placeholder="Type anything and press Enter...",
+            key="hope_answer"
+        )
 
-    if user_happy.strip():
-        st.balloons()  # BUBBLES 2
+        if user_happy.strip():
+            st.balloons()  # BUBBLES 2
 
-        if "PHQ-9" in tool:
-            recovery = f"Doing **{user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
-        elif "GAD-7" in tool:
-            recovery = f"Choosing **{user_happy}** calms your nervous system and lowers anxiety naturally."
-        else:
-            recovery = f"Engaging in **{user_happy}** grounds you and reduces psychosis risk."
+            if "PHQ-9" in tool:
+                recovery = f"Doing **{user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
+            elif "GAD-7" in tool:
+                recovery = f"Choosing **{user_happy}** calms your nervous system and lowers anxiety naturally."
+            else:
+                recovery = f"Engaging in **{user_happy}** grounds you and reduces psychosis risk."
 
-        st.success("**Uko sawa, utapita hii.**")
-        st.markdown(f"**{recovery}**")
+            st.success("**Uko sawa, utapita hii.**")
+            st.markdown(f"**{recovery}**")
 
-        # === 3 FUNNY QUESTIONS ===
-        st.markdown("### Just for fun — answer these 3 quick questions:")
-        funny_questions = [
-            f"If **{user_happy}** was a Kenyan celebrity, who would it be?",
-            f"How many chapatis would **{user_happy}** eat in one sitting?",
-            f"If **{user_happy}** had a superpower, what would it be?"
-        ]
+            # 3 FUNNY QUESTIONS
+            st.markdown("### Just for fun — answer these 3 quick questions:")
+            funny_questions = [
+                f"If **{user_happy}** was a Kenyan celebrity, who would it be?",
+                f"How many chapatis would **{user_happy}** eat in one sitting?",
+                f"If **{user_happy}** had a superpower, what would it be?"
+            ]
 
-        answered_count = 0
-        for i, q in enumerate(funny_questions):
-            ans = st.text_input(q, placeholder="Your funny answer...", key=f"fun{i}")
-            if ans.strip():
-                st.balloons()
-                st.markdown(f"😂 {ans} — I love it!")
-                answered_count += 1
+            for i, q in enumerate(funny_questions):
+                ans = st.text_input(q, placeholder="Your funny answer...", key=f"fun{i}")
+                if ans.strip():
+                    st.balloons()
+                    st.markdown(f"😂 {ans} — I love it!")
 
-        # FINAL MESSAGE AFTER ALL 3
-        if answered_count == 3:
-            st.balloons()
+            # FINAL MESSAGE
             st.success("**Uko sawa, utapita hii.**")
             st.markdown("**You are stronger than you know. I'm here to help you.**")
             st.markdown("— MentaBot")
@@ -131,4 +167,4 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
             st.info("Refresh the page to start a new session")
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | 3 funny questions | Full Jac in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | Personalized | Full Jac in repo | Eric Jeremiah")
