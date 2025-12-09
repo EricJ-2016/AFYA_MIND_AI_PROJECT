@@ -105,7 +105,6 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 **Now tell me —**
     """)
 
-    # INTERACTIVE — USER TYPES → BUBBLES + FINAL MESSAGE STAYS FOREVER
     user_answer = st.text_input(
         "What is one small thing I can do today to feel 1% better?",
         placeholder="Type anything here and press Enter...",
@@ -117,10 +116,6 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         st.success("**Uko sawa, utapita hii.**")
         st.markdown("**You are stronger than you know. I'm here whenever you need me.**")
         st.markdown("— MentaBot")
-        st.markdown("")  # Extra space so it doesn't disappear
-
-st.markdown("")  
-        st.success("You did it! Keep going. You are enough.")
 
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Interactive MentaBot | Swahili | Full Jac code in repo | Eric Jeremiah")
