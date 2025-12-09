@@ -1,10 +1,13 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Login page + Full screening + Bubbles + 3 funny questions + Final message
+# Login + 50-word description + Full screening + Report download + Bubbles + 3 funny questions
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
 
 import streamlit as st
+from fpdf import FPDF
+import base64
+from datetime import datetime
 
 # === REAL QUESTIONS ===
 PHQ9 = [
@@ -15,7 +18,7 @@ PHQ9 = [
     "Poor appetite or overeating?",
     "Feeling bad about yourself — or that you are a failure?",
     "Trouble concentrating on things?",
-    "Moving or speaking so slowly? Or very fidgety/restless?",
+    "Moving or speaking slowly? Or very fidgety?",
     "Thoughts that you would be better off dead or hurting yourself?"
 ]
 
@@ -24,7 +27,7 @@ GAD7 = [
     "Not being able to stop or control worrying?",
     "Worrying too much about different things?",
     "Trouble relaxing?",
-    "Being so restless that it is hard to sit still?",
+    "Being so restless that it's hard to sit still?",
     "Becoming easily annoyed or irritable?",
     "Feeling afraid as if something awful might happen?"
 ]
@@ -67,26 +70,40 @@ def calculate_score(tool, answers):
 # === APP ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
 
-# LOGIN PAGE
+# LOGIN SYSTEM
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+    st.session_state.user_name = ""
+    st.session_state.password_ok = False
 
 if not st.session_state.logged_in:
-    st.title("Welcome to AFYA-MIND")
-    st.markdown("**Where everything is possible. You are safe. You are not alone.**")
-    st.markdown("Please enter your name to begin your healing journey")
-    
-    name = st.text_input("Your Name", placeholder="e.g., Eric, Amina, John...")
-    if st.button("Start My Journey", type="primary"):
-        if name.strip():
+    st.title("AFYA-MIND")
+    st.markdown("""
+**AFYA-MIND is an AI-powered mental health companion that helps you screen for depression, anxiety, or psychosis risk using real clinical tools. MentaBot listens, detects your emotional triggers, and offers personalized support with Swahili warmth — because your mental health matters.**
+    """)
+    st.markdown("### Welcome! Please log in to start your session")
+
+    name = st.text_input("Your Name", placeholder="e.g., Eric, Amina...")
+    password = st.text_input("Password (any 4+ characters)", type="password", placeholder="Enter password")
+
+    if st.button("Login & Begin", type="primary"):
+        if name.strip() and len(password) >= 4:
             st.session_state.logged_in = True
             st.session_state.user_name = name.strip()
+            st.success(f"Welcome, {name.strip()}! Let's begin your journey.")
             st.rerun()
         else:
-            st.error("Please enter your name")
+            st.error("Please enter your name and a password (4+ characters)")
+
 else:
-    st.title(f"Welcome back, {st.session_state.user_name} ")
-    st.markdown("**You are safe here. Let's begin.**")
+    st.title(f"Hello, {st.session_state.user_name} ")
+    st.markdown("**You are safe. You are not alone. We are together.")
+
+    # RESET BUTTON
+    if st.button("Start New Session", type="secondary"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
 
     tool = st.selectbox("Choose Screening Tool", ["PHQ-9 (Depression)", "GAD-7 (Anxiety)", "WERCAP (Psychosis Risk)"])
     questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
@@ -136,11 +153,11 @@ else:
             st.balloons()  # BUBBLES 2
 
             if "PHQ-9" in tool:
-                recovery = f"Doing **{user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
+                recovery = f"Doing **{user_happy}** lifts mood and reduces depression."
             elif "GAD-7" in tool:
-                recovery = f"Choosing **{user_happy}** calms your nervous system and lowers anxiety naturally."
+                recovery = f"Choosing **{user_happy}** calms your nervous system."
             else:
-                recovery = f"Engaging in **{user_happy}** grounds you and reduces psychosis risk."
+                recovery = f"Engaging in **{user_happy}** grounds you and reduces risk."
 
             st.success("**Uko sawa, utapita hii.**")
             st.markdown(f"**{recovery}**")
@@ -149,7 +166,7 @@ else:
             st.markdown("### Just for fun — answer these 3 quick questions:")
             funny_questions = [
                 f"If **{user_happy}** was a Kenyan celebrity, who would it be?",
-                f"How many chapatis would **{user_happy}** eat in one sitting?",
+                f"How many chapatis would **{user_happy}** eat?",
                 f"If **{user_happy}** had a superpower, what would it be?"
             ]
 
@@ -157,14 +174,40 @@ else:
                 ans = st.text_input(q, placeholder="Your funny answer...", key=f"fun{i}")
                 if ans.strip():
                     st.balloons()
-                    st.markdown(f"😂 {ans} — I love it!")
 
             # FINAL MESSAGE
             st.success("**Uko sawa, utapita hii.**")
             st.markdown("**You are stronger than you know. I'm here to help you.**")
             st.markdown("— MentaBot")
-            st.markdown("")
-            st.info("Refresh the page to start a new session")
+
+            # === DOWNLOAD REPORT ===
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=16, style='B')
+            pdf.cell(0, 10, txt="AFYA-MIND Mental Health Report", ln=1, align='C')
+            pdf.ln(10)
+            pdf.set_font("Arial", size=12)
+            pdf.cell(0, 10, txt=f"Name: {st.session_state.user_name}", ln=1)
+            pdf.cell(0, 10, txt=f"Date: {datetime.now().strftime('%d/%m/%Y')}", ln=1)
+            pdf.cell(0, 10, txt=f"Screening Tool: {tool}", ln=1)
+            pdf.cell(0, 10, txt=f"Score: {score} → {level}", ln=1)
+            pdf.cell(0, 10, txt=f"Main Trigger: {trigger.capitalize()}", ln=1)
+            pdf.cell(0, 10, txt=f"Happy Action: {user_happy}", ln=1)
+            pdf.ln(10)
+            pdf.set_font("Arial", size=14, style='B')
+            pdf.cell(0, 10, txt="MentaBot says:", ln=1)
+            pdf.set_font("Arial", size=12)
+            pdf.multi_cell(0, 10, f"Uko sawa, utapita hii.\n{recovery}\nYou are stronger than you know.")
+
+            pdf_output = pdf.output(dest='S').encode('latin-1')
+            b64 = base64.b64encode(pdf_output).decode()
+
+            st.download_button(
+                label="Download Your Full Report (PDF)",
+                data=pdf_output,
+                file_name=f"AFYA-MIND_Report_{st.session_state.user_name}_{datetime.now().strftime('%Y%m%d')}.pdf",
+                mime="application/pdf"
+            )
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | Personalized | Full Jac in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Login | Report download | Full Jac in repo | Eric Jeremiah")
