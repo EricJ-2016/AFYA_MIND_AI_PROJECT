@@ -1,5 +1,4 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Full end-to-end app with login, screening, journal, fun questions, and final messages
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
