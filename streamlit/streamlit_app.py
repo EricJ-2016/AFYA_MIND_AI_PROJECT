@@ -173,7 +173,6 @@ if st.session_state.user_happy.strip():
         key_fun = f"fun{i}"
         if key_fun not in st.session_state:
             st.session_state[key_fun] = ""
-        # Persisted via key only, no direct assignment
         ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
         if ans.strip():
             st.balloons()
@@ -185,17 +184,15 @@ if st.session_state.user_happy.strip():
     st.markdown("— MentaBot")
 
 # === SAFE RESET SESSION ===
-if "reset_session" not in st.session_state:
-    st.session_state.reset_session = False
-
 if st.button("Start New Session"):
-    st.session_state.reset_session = True
+    st.session_state.clear_on_next_run = True
+    st.experimental_rerun()
 
-if st.session_state.reset_session:
-    keys_to_delete = [key for key in st.session_state.keys() if key != "reset_session"]
+if st.session_state.get("clear_on_next_run", False):
+    keys_to_delete = [key for key in st.session_state.keys() if key != "clear_on_next_run"]
     for key in keys_to_delete:
         del st.session_state[key]
-    st.session_state.reset_session = False
+    st.session_state.clear_on_next_run = False
     st.experimental_rerun()
 
 st.markdown("---")
