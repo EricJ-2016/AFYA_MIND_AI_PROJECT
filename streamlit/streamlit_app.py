@@ -65,7 +65,7 @@ def calculate_score(tool, answers):
 # === APP CONFIG ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="🧠", layout="centered")
 
-# === LOGIN PAGE WITH SAFE RERUN ===
+# === LOGIN PAGE WITH FRIENDLY INTRO ===
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "login_submitted" not in st.session_state:
@@ -161,7 +161,7 @@ if st.session_state.user_happy.strip():
     st.success("**Uko sawa, utapita hii.**")
     st.markdown(f"**{recovery}**")
 
-    # === FUNNY QUESTIONS (always rendered) ===
+    # === FUNNY QUESTIONS (persistent, fixed API exception) ===
     st.markdown("### Just for fun — answer these 3 quick questions:")
     funny_questions = [
         f"If **{st.session_state.user_happy}** was a Kenyan celebrity, who would it be?",
@@ -173,9 +173,8 @@ if st.session_state.user_happy.strip():
         key_fun = f"fun{i}"
         if key_fun not in st.session_state:
             st.session_state[key_fun] = ""
-        # Render text input with persistent value
+        # Persisted via key only, no direct assignment
         ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
-        st.session_state[key_fun] = ans
         if ans.strip():
             st.balloons()
             st.markdown(f"😂 {ans} — I love it!")
