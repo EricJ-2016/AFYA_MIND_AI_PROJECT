@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Login page + Full screening + Bubbles + 3 funny questions + Final message
+# Full end-to-end app with login, screening, journal, fun questions, and final messages
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -53,6 +53,7 @@ WERCAP = [
     "I have felt that I have no thoughts or an empty mind."
 ]
 
+# === SCORING FUNCTION ===
 def calculate_score(tool, answers):
     score = sum(answers)
     if tool == "PHQ-9":
@@ -63,10 +64,10 @@ def calculate_score(tool, answers):
         level = "Low Risk" if score <= 20 else "Moderate Risk" if score <= 40 else "High Risk"
     return score, level
 
-# === APP ===
-st.set_page_config(page_title="AFYA-MIND", page_icon="brain", layout="centered")
+# === APP CONFIG ===
+st.set_page_config(page_title="AFYA-MIND", page_icon="🧠", layout="centered")
 
-# LOGIN PAGE
+# === LOGIN PAGE ===
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -87,6 +88,7 @@ else:
     st.title(f"Welcome back, {st.session_state.user_name} ")
     st.markdown("**You are safe here. Let's begin.**")
 
+    # Choose Screening Tool
     tool = st.selectbox("Choose Screening Tool", ["PHQ-9 (Depression)", "GAD-7 (Anxiety)", "WERCAP (Psychosis Risk)"])
     questions = PHQ9 if "PHQ-9" in tool else GAD7 if "GAD-7" in tool else WERCAP
 
@@ -122,45 +124,52 @@ else:
 **Now tell me —**
         """)
 
-        user_happy = st.text_input(
-            "What is one small thing I can do today to feel 1% better?",
-            placeholder="Type anything and press Enter...",
-            key="hope_answer"
-        )
+# === USER HAPPY ACTION + FUN QUESTIONS PERSISTENT ===
+if "user_happy" not in st.session_state:
+    st.session_state.user_happy = ""
 
-        if user_happy.strip():
-            st.balloons()  # BUBBLES 2
+st.session_state.user_happy = st.text_input(
+    "What is one small thing I can do today to feel 1% better?",
+    placeholder="Type anything and press Enter...",
+    value=st.session_state.user_happy,
+    key="hope_answer"
+)
 
-            if "PHQ-9" in tool:
-                recovery = f"Doing **{user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
-            elif "GAD-7" in tool:
-                recovery = f"Choosing **{user_happy}** calms your nervous system and lowers anxiety naturally."
-            else:
-                recovery = f"Engaging in **{user_happy}** grounds you and reduces psychosis risk."
+if st.session_state.user_happy.strip():
+    st.balloons()  # BUBBLES 2
 
-            st.success("**Uko sawa, utapita hii.**")
-            st.markdown(f"**{recovery}**")
+    if "PHQ-9" in tool:
+        recovery = f"Doing **{st.session_state.user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
+    elif "GAD-7" in tool:
+        recovery = f"Choosing **{st.session_state.user_happy}** calms your nervous system and lowers anxiety naturally."
+    else:
+        recovery = f"Engaging in **{st.session_state.user_happy}** grounds you and reduces psychosis risk."
 
-            # 3 FUNNY QUESTIONS
-            st.markdown("### Just for fun — answer these 3 quick questions:")
-            funny_questions = [
-                f"If **{user_happy}** was a Kenyan celebrity, who would it be?",
-                f"How many chapatis would **{user_happy}** eat in one sitting?",
-                f"If **{user_happy}** had a superpower, what would it be?"
-            ]
+    st.success("**Uko sawa, utapita hii.**")
+    st.markdown(f"**{recovery}**")
 
-            for i, q in enumerate(funny_questions):
-                ans = st.text_input(q, placeholder="Your funny answer...", key=f"fun{i}")
-                if ans.strip():
-                    st.balloons()
-                    st.markdown(f"😂 {ans} — I love it!")
+    # 3 FUNNY QUESTIONS
+    st.markdown("### Just for fun — answer these 3 quick questions:")
+    funny_questions = [
+        f"If **{st.session_state.user_happy}** was a Kenyan celebrity, who would it be?",
+        f"How many chapatis would **{st.session_state.user_happy}** eat in one sitting?",
+        f"If **{st.session_state.user_happy}** had a superpower, what would it be?"
+    ]
 
-            # FINAL MESSAGE
-            st.success("**Uko sawa, utapita hii.**")
-            st.markdown("**You are stronger than you know. I'm here to help you.**")
-            st.markdown("— MentaBot")
-            st.markdown("")
-            st.info("Refresh the page to start a new session")
+    for i, q in enumerate(funny_questions):
+        key_fun = f"fun{i}"
+        if key_fun not in st.session_state:
+            st.session_state[key_fun] = ""
+        st.session_state[key_fun] = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
+        if st.session_state[key_fun].strip():
+            st.balloons()
+            st.markdown(f"😂 {st.session_state[key_fun]} — I love it!")
+
+    # FINAL MESSAGE
+    st.success("**Uko sawa, utapita hii.**")
+    st.markdown("**You are stronger than you know. I'm here to help you.**")
+    st.markdown("— MentaBot")
+    st.info("Refresh the page to start a new session")
 
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | Personalized | Full Jac in repo | Eric Jeremiah")
