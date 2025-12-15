@@ -1,6 +1,4 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Full end-to-end app with login, screening, journal, fun questions, and final messages
-
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
 import streamlit as st
@@ -151,9 +149,8 @@ st.session_state.user_happy = st.text_input(
     key="hope_answer"
 )
 
+# Show recovery message if user_happy exists
 if st.session_state.user_happy.strip():
-    st.balloons()  # BUBBLES 2
-
     if "PHQ-9" in tool:
         recovery = f"Doing **{st.session_state.user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
     elif "GAD-7" in tool:
@@ -164,7 +161,7 @@ if st.session_state.user_happy.strip():
     st.success("**Uko sawa, utapita hii.**")
     st.markdown(f"**{recovery}**")
 
-    # 3 FUNNY QUESTIONS
+    # === FUNNY QUESTIONS (always rendered) ===
     st.markdown("### Just for fun — answer these 3 quick questions:")
     funny_questions = [
         f"If **{st.session_state.user_happy}** was a Kenyan celebrity, who would it be?",
@@ -176,7 +173,9 @@ if st.session_state.user_happy.strip():
         key_fun = f"fun{i}"
         if key_fun not in st.session_state:
             st.session_state[key_fun] = ""
+        # Render text input with persistent value
         ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
+        st.session_state[key_fun] = ans
         if ans.strip():
             st.balloons()
             st.markdown(f"😂 {ans} — I love it!")
@@ -185,13 +184,20 @@ if st.session_state.user_happy.strip():
     st.success("**Uko sawa, utapita hii.**")
     st.markdown("**You are stronger than you know. I'm here to help you.**")
     st.markdown("— MentaBot")
-    st.info("Click below to start a new session:")
 
-    # Reset session button
-    if st.button("Start New Session"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.experimental_rerun()
+# === SAFE RESET SESSION ===
+if "reset_session" not in st.session_state:
+    st.session_state.reset_session = False
+
+if st.button("Start New Session"):
+    st.session_state.reset_session = True
+
+if st.session_state.reset_session:
+    keys_to_delete = [key for key in st.session_state.keys() if key != "reset_session"]
+    for key in keys_to_delete:
+        del st.session_state[key]
+    st.session_state.reset_session = False
+    st.experimental_rerun()
 
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | Personalized | Full Jac in repo | Eric Jeremiah")
