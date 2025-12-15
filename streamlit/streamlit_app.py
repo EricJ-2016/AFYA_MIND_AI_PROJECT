@@ -72,8 +72,14 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    st.title("Welcome to AFYA-MIND")
-    st.markdown("**Where everything is possible. You are safe. You are not alone.**")
+    st.title("🌟 Welcome to AFYA-MIND 🌟")
+    st.markdown("""
+**Happiness starts here!**  
+Hi there! I’m **MentaBot**, your AI friend. 😊  
+We’re going to explore how you feel today — your joys, worries, and little wins.  
+Take a deep breath. You are safe, you are heard, and we are friends.  
+Let’s start your journey to feeling a bit lighter today.
+""")
     st.markdown("Please enter your name to begin your healing journey")
    
     name = st.text_input("Your Name", placeholder="e.g., Eric, Amina, John...")
@@ -81,7 +87,7 @@ if not st.session_state.logged_in:
         if name.strip():
             st.session_state.logged_in = True
             st.session_state.user_name = name.strip()
-            st.rerun()
+            st.experimental_rerun()
         else:
             st.error("Please enter your name")
 else:
@@ -160,17 +166,22 @@ if st.session_state.user_happy.strip():
         key_fun = f"fun{i}"
         if key_fun not in st.session_state:
             st.session_state[key_fun] = ""
-        # Corrected: use ans local variable
         ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
         if ans.strip():
             st.balloons()
             st.markdown(f"😂 {ans} — I love it!")
 
     # FINAL MESSAGE
-    st.success("**Uko sawa, Be Happy.**")
+    st.success("**Uko sawa, utapita hii.**")
     st.markdown("**You are stronger than you know. I'm here to help you.**")
     st.markdown("— MentaBot")
-    st.info("Refresh the page to start a new session")
+    st.info("Click below to start a new session:")
+
+    # Reset session button
+    if st.button("Start New Session"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.experimental_rerun()
 
 st.markdown("---")
 st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | Personalized | Full Jac in repo | Eric Jeremiah")
