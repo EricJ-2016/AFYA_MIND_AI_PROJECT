@@ -1,4 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
+# Full end-to-end app with login, screening, journal, fun questions, and final messages
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -159,13 +160,14 @@ if st.session_state.user_happy.strip():
         key_fun = f"fun{i}"
         if key_fun not in st.session_state:
             st.session_state[key_fun] = ""
-        st.session_state[key_fun] = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
-        if st.session_state[key_fun].strip():
+        # Corrected: use ans local variable
+        ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
+        if ans.strip():
             st.balloons()
-            st.markdown(f"😂 {st.session_state[key_fun]} — I love it!")
+            st.markdown(f"😂 {ans} — I love it!")
 
     # FINAL MESSAGE
-    st.success("**Uko sawa, utapita hii.**")
+    st.success("**Uko sawa, Be Happy.**")
     st.markdown("**You are stronger than you know. I'm here to help you.**")
     st.markdown("— MentaBot")
     st.info("Refresh the page to start a new session")
