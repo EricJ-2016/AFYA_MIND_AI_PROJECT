@@ -179,8 +179,8 @@ if st.session_state.user_happy.strip():
             st.markdown(f"😂 {ans} — I love it!")
 
     # FINAL MESSAGE
-    st.success("**Uko sawa, utapita hii.**")
-    st.markdown("**You are stronger than you know. I'm here to help you.**")
+    st.success("**Uko sawa, You are fit now. Take Care**")
+    st.markdown("**You are stronger than you know. I'm here to help you. YOUR HEALTH MATTERS**")
     st.markdown("— MentaBot")
 
 # === SAFE RESET SESSION ===
