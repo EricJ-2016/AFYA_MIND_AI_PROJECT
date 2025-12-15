@@ -67,9 +67,11 @@ def calculate_score(tool, answers):
 # === APP CONFIG ===
 st.set_page_config(page_title="AFYA-MIND", page_icon="🧠", layout="centered")
 
-# === LOGIN PAGE ===
+# === LOGIN PAGE WITH SAFE RERUN ===
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+if "login_submitted" not in st.session_state:
+    st.session_state.login_submitted = False
 
 if not st.session_state.logged_in:
     st.title("🌟 Welcome to AFYA-MIND 🌟")
@@ -83,14 +85,22 @@ Let’s start your journey to feeling a bit lighter today.
     st.markdown("Please enter your name to begin your healing journey")
    
     name = st.text_input("Your Name", placeholder="e.g., Eric, Amina, John...")
+
     if st.button("Start My Journey", type="primary"):
         if name.strip():
             st.session_state.logged_in = True
             st.session_state.user_name = name.strip()
-            st.experimental_rerun()
+            st.session_state.login_submitted = True
         else:
             st.error("Please enter your name")
-else:
+
+# Safe rerun after login submission
+if st.session_state.get("login_submitted"):
+    st.session_state.login_submitted = False
+    st.experimental_rerun()
+
+# === MAIN APP ===
+if st.session_state.get("logged_in"):
     st.title(f"Welcome back, {st.session_state.user_name} ")
     st.markdown("**You are safe here. Let's begin.**")
 
