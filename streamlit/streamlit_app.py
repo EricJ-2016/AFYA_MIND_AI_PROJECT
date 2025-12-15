@@ -1,5 +1,5 @@
 # streamlit_app.py - AFYA-MIND FINAL WINNER (ERIC JEREMIAH)
-# Login + Description + Screening + Bubbles + 3 funny questions + PDF Report
+# Login + Description + Screening + Bubbles + Report download + Full flow
 
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
@@ -21,7 +21,7 @@ PHQ9 = [
     "Poor appetite or overeating?",
     "Feeling bad about yourself — or that you are a failure?",
     "Trouble concentrating on things?",
-    "Moving or speaking slowly? Or very fidgety/restless?",
+    "Moving or speaking so slowly? Or very fidgety/restless?",
     "Thoughts that you would be better off dead or hurting yourself?"
 ]
 
@@ -30,7 +30,7 @@ GAD7 = [
     "Not being able to stop or control worrying?",
     "Worrying too much about different things?",
     "Trouble relaxing?",
-    "Being so restless that it's hard to sit still?",
+    "Being so restless that it is hard to sit still?",
     "Becoming easily annoyed or irritable?",
     "Feeling afraid as if something awful might happen?"
 ]
@@ -180,7 +180,7 @@ else:
             st.markdown("**You are stronger than you know. I'm here to help you.**")
             st.markdown("— MentaBot")
 
-            # === DOWNLOAD REPORT ===
+            # === DOWNLOAD REPORT (FIXED) ===
             buffer = io.BytesIO()
             doc = SimpleDocTemplate(buffer, pagesize=letter)
             styles = getSampleStyleSheet()
@@ -198,4 +198,16 @@ else:
             story.append(Paragraph("MentaBot Message:", styles['Heading2']))
             story.append(Paragraph(f"Uko sawa, utapita hii.\n{recovery}\nYou are stronger than you know.", styles['Normal']))
 
-            doc.build(story
+            doc.build(story)  # FIXED: closed parenthesis
+            pdf = buffer.getvalue()
+            buffer.close()
+
+            st.download_button(
+                label="Download Your Full Report (PDF)",
+                data=pdf,
+                file_name=f"AFYA-MIND_Report_{st.session_state.user_name}_{datetime.now().strftime('%Y%m%d')}.pdf",
+                mime="application/pdf"
+            )
+
+st.markdown("---")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP | Login | Report download | Full Jac in repo | Eric Jeremiah")
