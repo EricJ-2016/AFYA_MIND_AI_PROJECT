@@ -196,4 +196,4 @@ if st.session_state.get("clear_on_next_run", False):
     st.experimental_rerun()
 
 st.markdown("---")
-st.caption("Real PHQ-9 • GAD-7 • WERCAP | Bubbles | Personalized | Full Jac in repo | Eric Jeremiah")
+st.caption("Real PHQ-9 • GAD-7 • WERCAP| Personalized | Full Jac in repo | Eric Jeremiah: Author")
