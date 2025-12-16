@@ -2,8 +2,15 @@
 import os
 os.environ['PIL_AVIF_IGNORE'] = '1'
 import streamlit as st
+import pickle
+import datetime
+import networkx as nx
+import matplotlib.pyplot as plt
+import requests
 
+# ======================
 # === REAL QUESTIONS ===
+# ======================
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -51,7 +58,9 @@ WERCAP = [
     "I have felt that I have no thoughts or an empty mind."
 ]
 
+# ======================
 # === SCORING FUNCTION ===
+# ======================
 def calculate_score(tool, answers):
     score = sum(answers)
     if tool == "PHQ-9":
@@ -62,15 +71,37 @@ def calculate_score(tool, answers):
         level = "Low Risk" if score <= 20 else "Moderate Risk" if score <= 40 else "High Risk"
     return score, level
 
+# ======================
 # === APP CONFIG ===
+# ======================
 st.set_page_config(page_title="AFYA-MIND", page_icon="🧠", layout="centered")
 
-# === LOGIN PAGE WITH FRIENDLY INTRO ===
+# ======================
+# === SESSION INIT ===
+# ======================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "login_submitted" not in st.session_state:
     st.session_state.login_submitted = False
+if "user_happy" not in st.session_state:
+    st.session_state.user_happy = ""
+if "emotion_graph" not in st.session_state:
+    st.session_state.emotion_graph = nx.DiGraph()
+if "submissions" not in st.session_state:
+    st.session_state.submissions = []
 
+GRAPH_FILE = "graph.pkl"
+
+# Load graph from previous sessions
+try:
+    with open(GRAPH_FILE, "rb") as f:
+        st.session_state.emotion_graph = pickle.load(f)
+except:
+    pass
+
+# ======================
+# === LOGIN PAGE ===
+# ======================
 if not st.session_state.logged_in:
     st.title("🌟 Welcome to AFYA-MIND 🌟")
     st.markdown("""
@@ -92,12 +123,13 @@ Let’s start your journey to feeling a bit lighter today.
         else:
             st.error("Please enter your name")
 
-# Safe rerun after login submission
 if st.session_state.get("login_submitted"):
     st.session_state.login_submitted = False
     st.experimental_rerun()
 
+# ======================
 # === MAIN APP ===
+# ======================
 if st.session_state.get("logged_in"):
     st.title(f"Welcome back, {st.session_state.user_name} ")
     st.markdown("**You are safe here. Let's begin.**")
@@ -115,19 +147,27 @@ if st.session_state.get("logged_in"):
 
     journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family pressure...")
 
+    # === LLM-powered trigger detection (via OpenAI or mock logic) ===
+    def detect_trigger(text):
+        text = text.lower()
+        triggers = {
+            "work": ["work", "job", "boss"],
+            "family": ["family", "parent", "child", "spouse"],
+            "finances": ["money", "bill", "rent", "loan"],
+            "academic": ["exam", "study", "homework"],
+        }
+        for key, keywords in triggers.items():
+            if any(word in text for word in keywords):
+                return key
+        if text.strip():
+            return text.strip().split()[0] + " concern"
+        return "general"
+
     if st.button("Submit & Talk to MentaBot", type="primary"):
         score, level = calculate_score(tool.split()[0], answers)
+        trigger = detect_trigger(journal)
 
-        # Trigger detection
-        text = journal.lower()
-        trigger = "stress"
-        if any(w in text for w in ["work","job","boss"]): trigger = "work stress"
-        elif any(w in text for w in ["family","parent","child"]): trigger = "family"
-        elif any(w in text for w in ["money","bill"]): trigger = "finances"
-        elif any(w in text for w in ["exam","study"]): trigger = "academic pressure"
-        elif journal.strip(): trigger = journal.strip().split()[0] + " concern"
-
-        st.balloons()  # BUBBLES 1
+        st.balloons()  # BUBBLES
         st.success(f"Score: {score} → {level}")
         st.info(f"Detected trigger: **{trigger.capitalize()}**")
 
@@ -138,52 +178,130 @@ if st.session_state.get("logged_in"):
 **Now tell me —**
         """)
 
-# === USER HAPPY ACTION + FUN QUESTIONS PERSISTENT ===
-if "user_happy" not in st.session_state:
-    st.session_state.user_happy = ""
+        # Save user happy action
+        st.session_state.user_happy = st.text_input(
+            "What is one small thing I can do today to feel 1% better?",
+            placeholder="Type anything and press Enter...",
+            value=st.session_state.user_happy,
+            key="hope_answer"
+        )
 
-st.session_state.user_happy = st.text_input(
-    "What is one small thing I can do today to feel 1% better?",
-    placeholder="Type anything and press Enter...",
-    value=st.session_state.user_happy,
-    key="hope_answer"
-)
+        # ======================
+        # UPDATE EMOTION GRAPH
+        # ======================
+        emotion_node = f"{tool.split()[0]}-{level} {'😊' if 'Minimal' in level else '😐' if 'Mild' in level else '😟' if 'Moderate' in level else '😔' if 'Moderately' in level else '😢'}"
+        trigger_node = f"Trigger: {trigger} 🔔"
+        activity_node = f"Action: {st.session_state.user_happy if st.session_state.user_happy else 'Self-care'} 🌱"
 
-# Show recovery message if user_happy exists
-if st.session_state.user_happy.strip():
-    if "PHQ-9" in tool:
-        recovery = f"Doing **{st.session_state.user_happy}** is a beautiful step. Small actions like this lift mood and reduce depression."
-    elif "GAD-7" in tool:
-        recovery = f"Choosing **{st.session_state.user_happy}** calms your nervous system and lowers anxiety naturally."
-    else:
-        recovery = f"Engaging in **{st.session_state.user_happy}** grounds you and reduces psychosis risk."
+        G = st.session_state.emotion_graph
+        G.add_node(emotion_node, type="emotion")
+        G.add_node(trigger_node, type="trigger")
+        G.add_node(activity_node, type="activity")
+        G.add_edge(emotion_node, trigger_node, relation="influenced_by")
+        G.add_edge(emotion_node, activity_node, relation="relieved_by")
 
-    st.success("**Uko sawa, utapita hii.**")
-    st.markdown(f"**{recovery}**")
+        # Save submission for trend detection
+        st.session_state.submissions.append({
+            "date": datetime.date.today(),
+            "tool": tool.split()[0],
+            "score": score,
+            "level": level
+        })
 
-    # === FUNNY QUESTIONS (persistent, fixed API exception) ===
-    st.markdown("### Just for fun — answer these 3 quick questions:")
-    funny_questions = [
-        f"If **{st.session_state.user_happy}** was a Kenyan celebrity, who would it be?",
-        f"How many chapatis would **{st.session_state.user_happy}** eat in one sitting?",
-        f"If **{st.session_state.user_happy}** had a superpower, what would it be?"
-    ]
+        # Save graph persistently
+        with open(GRAPH_FILE, "wb") as f:
+            pickle.dump(G, f)
 
-    for i, q in enumerate(funny_questions):
-        key_fun = f"fun{i}"
-        if key_fun not in st.session_state:
-            st.session_state[key_fun] = ""
-        ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
-        if ans.strip():
-            st.balloons()
-            st.markdown(f"😂 {ans} — I love it!")
+        # ======================
+        # TREND DETECTION (Weekly)
+        # ======================
+        last_week = datetime.date.today() - datetime.timedelta(days=7)
+        weekly_scores = [s["score"] for s in st.session_state.submissions if s["date"] >= last_week]
+        if weekly_scores:
+            avg_score = sum(weekly_scores) / len(weekly_scores)
+            trend_msg = f"📊 Your average score this week: {avg_score:.1f} → {'Stable' if avg_score < 10 else 'Increasing stress' if avg_score >= 10 else 'Improving'}"
+            st.info(trend_msg)
 
-    # FINAL MESSAGE
-    st.success("**Uko sawa, You are fit now. Take Care**")
-    st.markdown("**You are stronger than you know. I'm here to help you. YOUR HEALTH MATTERS**")
-    st.markdown("— MentaBot")
+        # Recovery message
+        if st.session_state.user_happy.strip():
+            recovery = f"Engaging in **{st.session_state.user_happy}** lifts your mood and reduces distress."
+            st.success("**Uko sawa, utapita hii.**")
+            st.markdown(f"**{recovery}**")
 
-# === SAFE RESET SESSION ===
+        # Fun Questions
+        st.markdown("### Just for fun — answer these 3 quick questions:")
+        funny_questions = [
+            f"If **{st.session_state.user_happy}** was a Kenyan celebrity, who would it be?",
+            f"How many chapatis would **{st.session_state.user_happy}** eat in one sitting?",
+            f"If **{st.session_state.user_happy}** had a superpower, what would it be?"
+        ]
+
+        for i, q in enumerate(funny_questions):
+            key_fun = f"fun{i}"
+            if key_fun not in st.session_state:
+                st.session_state[key_fun] = ""
+            ans = st.text_input(q, placeholder="Your funny answer...", value=st.session_state[key_fun], key=key_fun)
+            if ans.strip():
+                st.balloons()
+                st.markdown(f"😂 {ans} — I love it!")
+
+        # Final message
+        st.success("**Uko sawa, You are fit now. Take Care**")
+        st.markdown("**You are stronger than you know. I'm here to help you. YOUR HEALTH MATTERS**")
+        st.markdown("— MentaBot")
+
+# ======================
+# EMOTION–TRIGGER GRAPH VIEW
+# ======================
+st.markdown("## 🧠 Emotion–Trigger–Activity Graph")
+
+if st.session_state.emotion_graph.number_of_nodes() == 0:
+    st.info("Graph will appear after you submit your first reflection.")
+else:
+    fig, ax = plt.subplots(figsize=(8, 6))
+    pos = nx.spring_layout(st.session_state.emotion_graph, seed=42)
+
+    # Node colors by type
+    color_map = []
+    for node in st.session_state.emotion_graph.nodes:
+        node_type = st.session_state.emotion_graph.nodes[node].get("type", "")
+        if node_type == "emotion":
+            color_map.append("lightblue")
+        elif node_type == "trigger":
+            color_map.append("lightcoral")
+        elif node_type == "activity":
+            color_map.append("lightgreen")
+        else:
+            color_map.append("grey")
+
+    nx.draw(
+        st.session_state.emotion_graph,
+        pos,
+        with_labels=True,
+        node_size=2500,
+        font_size=9,
+        node_color=color_map,
+        ax=ax
+    )
+
+    edge_labels = nx.get_edge_attributes(st.session_state.emotion_graph, "relation")
+    nx.draw_networkx_edge_labels(
+        st.session_state.emotion_graph,
+        pos,
+        edge_labels=edge_labels,
+        font_size=8,
+        ax=ax
+    )
+
+    st.pyplot(fig)
+    st.caption(
+        "Nodes: emotions, triggers, and coping activities (with emojis). "
+        "Edges show influence and relief relationships."
+    )
+
+# ======================
+# SAFE RESET SESSION
+# ======================
 if st.button("Start New Session"):
     st.session_state.clear_on_next_run = True
     st.experimental_rerun()
