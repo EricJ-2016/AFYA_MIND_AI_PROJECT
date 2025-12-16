@@ -9,3 +9,6 @@ streamlit
 openai 
 pillow==9.5.0 
 reportlab Pillow
+requests
+networkx
+matplotlib
