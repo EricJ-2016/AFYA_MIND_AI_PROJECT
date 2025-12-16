@@ -147,7 +147,7 @@ if st.session_state.get("logged_in"):
 
     journal = st.text_area("How are you really feeling today?", placeholder="e.g., Work stress, family pressure...")
 
-    # === LLM-powered trigger detection (via OpenAI or mock logic) ===
+    # === LLM-powered trigger detection (simple mock) ===
     def detect_trigger(text):
         text = text.lower()
         triggers = {
@@ -189,7 +189,19 @@ if st.session_state.get("logged_in"):
         # ======================
         # UPDATE EMOTION GRAPH
         # ======================
-        emotion_node = f"{tool.split()[0]}-{level} {'😊' if 'Minimal' in level else '😐' if 'Mild' in level else '😟' if 'Moderate' in level else '😔' if 'Moderately' in level else '😢'}"
+        emoji_map = {
+            "Minimal": "😊",
+            "Mild": "😐",
+            "Moderate": "😟",
+            "Moderately Severe": "😔",
+            "Severe": "😢",
+            "Severe Anxiety": "😢",
+            "Low Risk": "😊",
+            "Moderate Risk": "😐",
+            "High Risk": "😟"
+        }
+
+        emotion_node = f"{tool.split()[0]}-{level} {emoji_map.get(level, '😐')}"
         trigger_node = f"Trigger: {trigger} 🔔"
         activity_node = f"Action: {st.session_state.user_happy if st.session_state.user_happy else 'Self-care'} 🌱"
 
