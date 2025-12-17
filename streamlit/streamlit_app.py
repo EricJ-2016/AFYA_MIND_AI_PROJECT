@@ -240,27 +240,27 @@ if st.session_state.latest:
 
 
 # EMOTION GRAPH
+import pandas as pd
+import matplotlib.pyplot as plt
+st.markdown("## 📈 Weekly Mood Trend")
 
-st.markdown("## 🧠 Emotion–Trigger–Activity Graph")
+# Prepare data
+if st.session_state.submissions:
+    df = pd.DataFrame(st.session_state.submissions)
+    # Convert dates to datetime
+    df['date'] = pd.to_datetime(df['date'])
+    # Group by date and take average score (if multiple per day)
+    df_daily = df.groupby('date')['score'].mean().reset_index()
 
-G = st.session_state.emotion_graph
-if st.session_state.latest:
-    e = f"{st.session_state.latest['tool']} - {st.session_state.latest['level']}"
-    t = f"Trigger: {st.session_state.latest['trigger']}"
-    a = f"Action: {st.session_state.latest['action'] or 'Self-care'}"
-
-    G.add_edge(e, t)
-    G.add_edge(e, a)
-
-    with open(GRAPH_FILE, "wb") as f:
-        pickle.dump(G, f)
-
-if G.number_of_nodes() > 0:
-    fig, ax = plt.subplots(figsize=(8, 6))
-    pos = nx.spring_layout(G, seed=42)
-    nx.draw(G, pos, with_labels=True, node_size=2600, font_size=9, ax=ax)
+    # Plot line chart
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.plot(df_daily['date'], df_daily['score'], marker='o', linestyle='-', color='dodgerblue')
+    ax.set_title("Mood Score Trend Over Time")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Average Score")
+    ax.grid(True)
     st.pyplot(fig)
 else:
-    st.info("Your graph will appear after your first reflection.")
+    st.info("Your weekly mood trend will appear here after submitting reflections.")
 
 st.caption("AFYA-MIND • Mental Health Matters • Eric Jeremiah")
