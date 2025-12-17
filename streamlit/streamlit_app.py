@@ -10,9 +10,9 @@ import datetime
 import networkx as nx
 import matplotlib.pyplot as plt
 
-# =========================
+
 # REAL SCREENING QUESTIONS
-# =========================
+
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -60,9 +60,9 @@ WERCAP = [
     "Empty mind feeling."
 ]
 
-# =========================
+
 # SCORING FUNCTION
-# =========================
+
 def calculate_score(tool, answers):
     score = sum(answers)
     if tool == "PHQ-9":
@@ -73,18 +73,18 @@ def calculate_score(tool, answers):
         level = "Low Risk" if score <= 20 else "Moderate Risk" if score <= 40 else "High Risk"
     return score, level
 
-# =========================
+
 # APP CONFIG
-# =========================
+
 st.set_page_config(
     page_title="AFYA-MIND",
     page_icon="🧠",
     layout="centered"
 )
 
-# =========================
+
 # SESSION INITIALIZATION
-# =========================
+
 defaults = {
     "logged_in": False,
     "user_name": "",
@@ -107,9 +107,9 @@ try:
 except:
     pass
 
-# =========================
+
 # WELCOME PAGE
-# =========================
+
 if not st.session_state.logged_in:
     st.title("🌟 Welcome to AFYA-MIND 🌟")
     st.markdown("""
@@ -129,9 +129,9 @@ if not st.session_state.logged_in:
 
     st.stop()
 
-# =========================
+
 # MAIN APP
-# =========================
+
 st.title(f"Welcome back, {st.session_state.user_name} 😊")
 st.markdown("**You are safe here. Let’s walk together.**")
 
@@ -159,9 +159,9 @@ journal = st.text_area(
     placeholder="Work, exams, relationships, finances…"
 )
 
-# =========================
+
 # SUBMIT
-# =========================
+
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
     st.balloons()
@@ -194,9 +194,9 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
 
     st.session_state.submissions.append(st.session_state.latest)
 
-# =========================
+
 # FUN QUESTIONS 🎉
-# =========================
+
 if st.session_state.latest:
     st.markdown("### 😂 Just for fun — answer these:")
     fun_qs = [
@@ -213,9 +213,9 @@ if st.session_state.latest:
 
     st.success("💪 **Uko sawa sasa. You are stronger than ever before.**")
 
-# =========================
+
 # WEEKLY AI CARE PLAN 🧠
-# =========================
+
 if st.session_state.submissions:
     st.markdown("## 🧠 AI Weekly Care Plan")
     st.markdown("""
@@ -226,9 +226,9 @@ if st.session_state.submissions:
     - 😊 Do one thing just for joy
     """)
 
-# =========================
+
 # REFLECTION SUMMARY 📄
-# =========================
+
 if st.session_state.latest:
     st.markdown("## 📄 Reflection Summary")
     data = st.session_state.latest
@@ -238,9 +238,9 @@ if st.session_state.latest:
         f"Your chosen coping action was **{data['action']}**."
     )
 
-# =========================
+
 # EMOTION GRAPH
-# =========================
+
 st.markdown("## 🧠 Emotion–Trigger–Activity Graph")
 
 G = st.session_state.emotion_graph
