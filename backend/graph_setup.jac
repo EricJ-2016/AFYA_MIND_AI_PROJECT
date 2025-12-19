@@ -1,41 +1,17 @@
-graph mind_graph {
-    has anchor root_user;
-
-    spawn {
-        root_user = spawn here :: user(username="root");
-        // Initialize named node/edge types
-    }
-
-    walker init_graph {
-        root {
-            // Example edges for correlations
-        }
-    }
+node Emotion {
+    has name: str;
+    has emoji: str;
+    has score: int;
 }
 
-node user: User;
-node emotion {
-    has mood_level: int;  // From screening score
-    has timestamp: str;
-    has text_input: str;
-}
-node trigger {
-    has name: str;  // e.g., "stress", "work"
-}
-node activity {
-    has name: str;  // e.g., "exercise"
-}
-node journal_entry {
-    has text: str;
-    has timestamp: str;
-}
-node suggestion {
-    has text: str;
+node Trigger {
+    has label: str;
 }
 
-edge influence {  // Trigger influences emotion
-    has strength: float;
+node Activity {
+    has description: str;
 }
+ HEAD
 edge correlation {  // Emotion correlates with activity
     has score: float;
 }
@@ -52,6 +28,7 @@ node Trigger {
 node Activity {
     has description: str;
 }
+ 1a12859a (Clean JacLang backend: OSP graph and walkers)
 
 edge influences {}
 edge alleviates {}
