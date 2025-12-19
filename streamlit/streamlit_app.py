@@ -9,10 +9,9 @@ import pickle
 import datetime
 import networkx as nx
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 # REAL SCREENING QUESTIONS
-
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -60,9 +59,7 @@ WERCAP = [
     "Empty mind feeling."
 ]
 
-
 # SCORING FUNCTION
-
 def calculate_score(tool, answers):
     score = sum(answers)
     if tool == "PHQ-9":
@@ -73,25 +70,22 @@ def calculate_score(tool, answers):
         level = "Low Risk" if score <= 20 else "Moderate Risk" if score <= 40 else "High Risk"
     return score, level
 
-
 # APP CONFIG
-
 st.set_page_config(
     page_title="AFYA-MIND",
     page_icon="🧠",
     layout="centered"
 )
 
-
 # SESSION INITIALIZATION
-
 defaults = {
     "logged_in": False,
     "user_name": "",
     "emotion_graph": nx.DiGraph(),
     "submissions": [],
     "user_happy": "",
-    "latest": None
+    "latest": None,
+    "day_counter": 0  # Tracks Day 1 → Day 7
 }
 
 for key, value in defaults.items():
@@ -99,17 +93,20 @@ for key, value in defaults.items():
         st.session_state[key] = value
 
 GRAPH_FILE = "graph.pkl"
-
-# Load saved graph
 try:
     with open(GRAPH_FILE, "rb") as f:
         st.session_state.emotion_graph = pickle.load(f)
 except:
     pass
 
+# RESTART SESSION BUTTON
+if st.session_state.logged_in:
+    if st.button("🔄 Restart Week"):
+        for key in defaults:
+            st.session_state[key] = defaults[key]
+        st.experimental_rerun()
 
 # WELCOME PAGE
-
 if not st.session_state.logged_in:
     st.title("🌟 Welcome to AFYA-MIND 🌟")
     st.markdown("""
@@ -129,9 +126,7 @@ if not st.session_state.logged_in:
 
     st.stop()
 
-
 # MAIN APP
-
 st.title(f"Welcome back, {st.session_state.user_name} 😊")
 st.markdown("**You are safe here. Let’s walk together.**")
 
@@ -159,13 +154,10 @@ journal = st.text_area(
     placeholder="Work, exams, relationships, finances…"
 )
 
-
 # SUBMIT
-
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
     st.balloons()
-
     st.success(f"🧠 Score: {score} → **{level}**")
 
     trigger = journal.split()[0] if journal.strip() else "general stress"
@@ -182,6 +174,11 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         placeholder="Even something tiny counts 💛"
     )
 
+    # Increment day counter (resets after 7)
+    st.session_state.day_counter += 1
+    if st.session_state.day_counter > 7:
+        st.session_state.day_counter = 1
+
     # Save latest reflection
     st.session_state.latest = {
         "date": datetime.date.today(),
@@ -189,14 +186,13 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         "score": score,
         "level": level,
         "trigger": trigger,
-        "action": st.session_state.user_happy
+        "action": st.session_state.user_happy,
+        "day_label": f"Day {st.session_state.day_counter}"
     }
 
     st.session_state.submissions.append(st.session_state.latest)
 
-
 # FUN QUESTIONS 🎉
-
 if st.session_state.latest:
     st.markdown("### 😂 Just for fun — answer these:")
     fun_qs = [
@@ -213,9 +209,7 @@ if st.session_state.latest:
 
     st.success("💪 **Uko sawa sasa. You are stronger than ever before.**")
 
-
 # WEEKLY AI CARE PLAN 🧠
-
 if st.session_state.submissions:
     st.markdown("## 🧠 AI Weekly Care Plan")
     st.markdown("""
@@ -226,44 +220,35 @@ if st.session_state.submissions:
     - 😊 Do one thing just for joy
     """)
 
-
 # REFLECTION SUMMARY 📄
-
 if st.session_state.latest:
     st.markdown("## 📄 Reflection Summary")
     data = st.session_state.latest
     st.write(
-        f"On **{data['date']}**, you completed **{data['tool']}**. "
+        f"On **{data['date']}** ({data['day_label']}), you completed **{data['tool']}**. "
         f"You experienced **{data['level']}** symptoms, mainly triggered by **{data['trigger']}**. "
         f"Your chosen coping action was **{data['action']}**."
     )
 
-
 # EMOTION GRAPH
-import pandas as pd
-import matplotlib.pyplot as plt
 st.markdown("## 📈 Weekly Mood Trend")
-
-# Prepare data
 if st.session_state.submissions:
     df = pd.DataFrame(st.session_state.submissions)
-    # Convert dates to datetime
-    df['date'] = pd.to_datetime(df['date'])
-    # Group by date and take average score (if multiple per day)
-    df_daily = df.groupby('date')['score'].mean().reset_index()
 
-    # Keep only last 7 entries for weekly trend
-    df_daily = df_daily.sort_values('date').tail(7).reset_index(drop=True)
+    # Always show x-axis as Day 1 → Day 7
+    day_labels = [f"Day {i}" for i in range(1, 8)]
+    scores = [None] * 7
 
-    # Create Day 1..Day N labels
-    df_daily['day_label'] = [f"Day {i+1}" for i in range(len(df_daily))]
+    # Use iterrows() to access rows properly
+    for _, sub in df[-7:].iterrows():
+        idx = int(sub.day_label.split()[-1]) - 1
+        scores[idx] = sub.score
 
-    # Plot line chart
     fig, ax = plt.subplots(figsize=(8,5))
-    ax.plot(df_daily['day_label'], df_daily['score'], marker='o', linestyle='-', color='dodgerblue')
-    ax.set_title("Mood Score Trend Over Last 7 Days")
+    ax.plot(day_labels, scores, marker='o', linestyle='-', color='dodgerblue')
+    ax.set_title("Mood Score Trend: Day 1 → Day 7")
     ax.set_xlabel("Day")
-    ax.set_ylabel("Average Score")
+    ax.set_ylabel("Score")
     ax.grid(True)
     st.pyplot(fig)
 else:
