@@ -219,7 +219,20 @@ if st.session_state.submissions:
     - 📝 Journal once this week  
     - 😊 Do one thing just for joy
     """)
+if st.button("🔄 Restart Session"):
+    # Reset all session state variables to defaults
+    defaults = {
+        "logged_in": False,
+        "user_name": "",
+        "emotion_graph": nx.DiGraph(),
+        "submissions": [],
+        "user_happy": "",
+        "latest": None
+    }
+    for key, value in defaults.items():
+        st.session_state[key] = value
 
+    st.experimental_rerun()  
 # REFLECTION SUMMARY 📄
 if st.session_state.latest:
     st.markdown("## 📄 Reflection Summary")
