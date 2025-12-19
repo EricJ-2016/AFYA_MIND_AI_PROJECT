@@ -252,11 +252,17 @@ if st.session_state.submissions:
     # Group by date and take average score (if multiple per day)
     df_daily = df.groupby('date')['score'].mean().reset_index()
 
+    # Keep only last 7 entries for weekly trend
+    df_daily = df_daily.sort_values('date').tail(7).reset_index(drop=True)
+
+    # Create Day 1..Day N labels
+    df_daily['day_label'] = [f"Day {i+1}" for i in range(len(df_daily))]
+
     # Plot line chart
     fig, ax = plt.subplots(figsize=(8,5))
-    ax.plot(df_daily['date'], df_daily['score'], marker='o', linestyle='-', color='dodgerblue')
-    ax.set_title("Mood Score Trend Over Time")
-    ax.set_xlabel("Date")
+    ax.plot(df_daily['day_label'], df_daily['score'], marker='o', linestyle='-', color='dodgerblue')
+    ax.set_title("Mood Score Trend Over Last 7 Days")
+    ax.set_xlabel("Day")
     ax.set_ylabel("Average Score")
     ax.grid(True)
     st.pyplot(fig)
