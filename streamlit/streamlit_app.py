@@ -10,7 +10,35 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
+# SESSION INITIALIZATION
+
+defaults = {
+    "logged_in": False,
+    "user_name": "",
+    "emotion_graph": nx.DiGraph(),
+    "submissions": [],
+    "user_happy": "",
+    "latest": None
+}
+
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
+GRAPH_FILE = "graph.pkl"
+
+# Load saved graph
+try:
+    with open(GRAPH_FILE, "rb") as f:
+        st.session_state.emotion_graph = pickle.load(f)
+except:
+    pass
+
+
 # REAL SCREENING QUESTIONS
+
+
 PHQ9 = [
     "Little interest or pleasure in doing things?",
     "Feeling down, depressed, or hopeless?",
@@ -58,7 +86,10 @@ WERCAP = [
     "Empty mind feeling."
 ]
 
+
 # SCORING FUNCTION
+
+
 def calculate_score(tool, answers):
     score = sum(answers)
     if tool == "PHQ-9":
@@ -69,43 +100,17 @@ def calculate_score(tool, answers):
         level = "Low Risk" if score <= 20 else "Moderate Risk" if score <= 40 else "High Risk"
     return score, level
 
+
 # APP CONFIG
+
 st.set_page_config(
     page_title="AFYA-MIND",
     page_icon="🧠",
     layout="centered"
 )
 
-# SESSION INITIALIZATION
-defaults = {
-    "logged_in": False,
-    "user_name": "",
-    "emotion_graph": nx.DiGraph(),
-    "submissions": [],
-    "user_happy": "",
-    "latest": None,
-    "day_counter": 0  # Tracks Day 1 → Day 7
-}
-
-for key, value in defaults.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
-
-GRAPH_FILE = "graph.pkl"
-try:
-    with open(GRAPH_FILE, "rb") as f:
-        st.session_state.emotion_graph = pickle.load(f)
-except:
-    pass
-
-# RESTART SESSION BUTTON
-if st.session_state.logged_in:
-    if st.button("🔄 Restart Week"):
-        for key in defaults:
-            st.session_state[key] = defaults[key]
-        st.experimental_rerun()
-
 # WELCOME PAGE
+
 if not st.session_state.logged_in:
     st.title("🌟 Welcome to AFYA-MIND 🌟")
     st.markdown("""
@@ -126,6 +131,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 # MAIN APP
+
 st.title(f"Welcome back, {st.session_state.user_name} 😊")
 st.markdown("**You are safe here. Let’s walk together.**")
 
@@ -154,9 +160,11 @@ journal = st.text_area(
 )
 
 # SUBMIT
+
 if st.button("Submit & Talk to MentaBot", type="primary"):
     score, level = calculate_score(tool.split()[0], answers)
     st.balloons()
+
     st.success(f"🧠 Score: {score} → **{level}**")
 
     trigger = journal.split()[0] if journal.strip() else "general stress"
@@ -173,11 +181,6 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         placeholder="Even something tiny counts 💛"
     )
 
-    # Increment day counter (resets after 7)
-    st.session_state.day_counter += 1
-    if st.session_state.day_counter > 7:
-        st.session_state.day_counter = 1
-
     # Save latest reflection
     st.session_state.latest = {
         "date": datetime.date.today(),
@@ -185,13 +188,13 @@ if st.button("Submit & Talk to MentaBot", type="primary"):
         "score": score,
         "level": level,
         "trigger": trigger,
-        "action": st.session_state.user_happy,
-        "day_label": f"Day {st.session_state.day_counter}"
+        "action": st.session_state.user_happy
     }
 
     st.session_state.submissions.append(st.session_state.latest)
 
-# FUN QUESTIONS 🎉
+# FUN QUESTIONS
+
 if st.session_state.latest:
     st.markdown("### 😂 Just for fun — answer these:")
     fun_qs = [
@@ -208,7 +211,8 @@ if st.session_state.latest:
 
     st.success("💪 **Uko sawa sasa. You are stronger than ever before.**")
 
-# WEEKLY AI CARE PLAN 🧠
+# WEEKLY AI CARE PLAN
+
 if st.session_state.submissions:
     st.markdown("## 🧠 AI Weekly Care Plan")
     st.markdown("""
@@ -218,53 +222,46 @@ if st.session_state.submissions:
     - 📝 Journal once this week  
     - 😊 Do one thing just for joy
     """)
-# REFLECTION SUMMARY 📄
+
+# REFLECTION SUMMARY
+
 if st.session_state.latest:
     st.markdown("## 📄 Reflection Summary")
     data = st.session_state.latest
     st.write(
-        f"On **{data['date']}** ({data['day_label']}), you completed **{data['tool']}**. "
+        f"On **{data['date']}**, you completed **{data['tool']}**. "
         f"You experienced **{data['level']}** symptoms, mainly triggered by **{data['trigger']}**. "
         f"Your chosen coping action was **{data['action']}**."
     )
 
-# EMOTION GRAPH
+# EMOTION GRAPH (DAY 1 → DAY 7)
 st.markdown("## 📈 Weekly Mood Trend")
+
 if st.session_state.submissions:
     df = pd.DataFrame(st.session_state.submissions)
-
-    # Always show x-axis as Day 1 → Day 7
-    day_labels = [f"Day {i}" for i in range(1, 8)]
-    scores = [None] * 7
-
-    # Use iterrows() to access rows properly
-    for _, sub in df[-7:].iterrows():
-        idx = int(sub.day_label.split()[-1]) - 1
-        scores[idx] = sub.score
+    df_daily = df.groupby(df.index % 7)['score'].mean().reset_index()  # 7-day cycle
+    df_daily['day_label'] = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"][:len(df_daily)]
 
     fig, ax = plt.subplots(figsize=(8,5))
-    ax.plot(day_labels, scores, marker='o', linestyle='-', color='dodgerblue')
-    ax.set_title("Mood Score Trend: Day 1 → Day 7")
+    ax.plot(df_daily['day_label'], df_daily['score'], marker='o', linestyle='-', color='dodgerblue')
+    ax.set_title("Mood Score Trend Over 7-Day Cycle")
     ax.set_xlabel("Day")
-    ax.set_ylabel("Score")
+    ax.set_ylabel("Average Score")
     ax.grid(True)
     st.pyplot(fig)
 else:
     st.info("Your weekly mood trend will appear here after submitting reflections.")
 
+st.caption("AFYA-MIND • Mental Health Matters • Eric Jeremiah")
+
+# RESTART BUTTON
+
+st.markdown("---")
 if st.button("🔄 Restart Session"):
-    # Reset all session state variables to defaults
-    defaults = {
-        "logged_in": False,
-        "user_name": "",
-        "emotion_graph": nx.DiGraph(),
-        "submissions": [],
-        "user_happy": "",
-        "latest": None
-    }
+    # Reset all session state
     for key, value in defaults.items():
         st.session_state[key] = value
+    st.experimental_rerun()
 
-    st.experimental_rerun()  
 
 st.caption("AFYA-MIND • Mental Health Matters • Eric Jeremiah")
