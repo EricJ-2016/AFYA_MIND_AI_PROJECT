@@ -16,7 +16,7 @@
 - **Backend**: JacLang (OSP graph with emotions, triggers, activities)
 - **Walkers**: log_mood, weekly_trend
 - **Frontend 1**: Streamlit (user-facing UI)
-- **Frontend 2**: Jac-Client (mandatory Jaseci stack interface)
+- **Frontend 2**: Jac-Client (Jaseci stack interface)
 - **LLM**: Used for trigger detection and empathetic responses
  643ff339 (Add Jac-Client frontend, clean legacy files, and document architecture)
 
