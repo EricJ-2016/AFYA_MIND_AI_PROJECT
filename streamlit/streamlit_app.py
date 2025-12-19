@@ -1,4 +1,3 @@
-# streamlit_app.py — AFYA-MIND FINAL STABLE BUILD
 # Author: Eric Jeremiah
 
 import os
@@ -219,20 +218,6 @@ if st.session_state.submissions:
     - 📝 Journal once this week  
     - 😊 Do one thing just for joy
     """)
-if st.button("🔄 Restart Session"):
-    # Reset all session state variables to defaults
-    defaults = {
-        "logged_in": False,
-        "user_name": "",
-        "emotion_graph": nx.DiGraph(),
-        "submissions": [],
-        "user_happy": "",
-        "latest": None
-    }
-    for key, value in defaults.items():
-        st.session_state[key] = value
-
-    st.experimental_rerun()  
 # REFLECTION SUMMARY 📄
 if st.session_state.latest:
     st.markdown("## 📄 Reflection Summary")
@@ -266,5 +251,20 @@ if st.session_state.submissions:
     st.pyplot(fig)
 else:
     st.info("Your weekly mood trend will appear here after submitting reflections.")
+
+if st.button("🔄 Restart Session"):
+    # Reset all session state variables to defaults
+    defaults = {
+        "logged_in": False,
+        "user_name": "",
+        "emotion_graph": nx.DiGraph(),
+        "submissions": [],
+        "user_happy": "",
+        "latest": None
+    }
+    for key, value in defaults.items():
+        st.session_state[key] = value
+
+    st.experimental_rerun()  
 
 st.caption("AFYA-MIND • Mental Health Matters • Eric Jeremiah")
