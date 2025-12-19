@@ -39,3 +39,19 @@ edge influence {  // Trigger influences emotion
 edge correlation {  // Emotion correlates with activity
     has score: float;
 }
+node Emotion {
+    has name: str;
+    has emoji: str;
+    has score: int;
+}
+
+node Trigger {
+    has label: str;
+}
+
+node Activity {
+    has description: str;
+}
+
+edge influences {}
+edge alleviates {}
