@@ -11,16 +11,6 @@
 - Seed data + metrics
 - Weekly AI-generated care plans and reflection summaries
 
-# **Requirements**:
-# - Jac core + OSP graph + byLLM + Jac Client + spawn()
-# - 3 agents: Logger → Analyzer → Suggester
-# - Real PHQ-9, GAD-7, WERCAP
-# - Swahili MentaBot
-# - Bubbles + personalized recovery
-# - Full reset + repeat
-# - Seed data + metrics
-# - Weekly AI-generated care plans and reflection summaries
-
 ## Architecture Overview
 
 - **Backend**: JacLang (OSP graph with emotions, triggers, activities)
