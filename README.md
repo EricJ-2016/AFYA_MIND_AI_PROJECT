@@ -1,5 +1,6 @@
 # AFYA-MIND – Project 5: MindMate Harmony Space
 
+ HEAD
 # **Requirements**
 - Jac core + OSP graph + byLLM + Jac Client + spawn()
 - 3 agents: Logger → Analyzer → Suggester
@@ -9,6 +10,25 @@
 - Full reset + repeat
 - Seed data + metrics
 - Weekly AI-generated care plans and reflection summaries
+
+# **Requirements**:
+# - Jac core + OSP graph + byLLM + Jac Client + spawn()
+# - 3 agents: Logger → Analyzer → Suggester
+# - Real PHQ-9, GAD-7, WERCAP
+# - Swahili MentaBot
+# - Bubbles + personalized recovery
+# - Full reset + repeat
+# - Seed data + metrics
+# - Weekly AI-generated care plans and reflection summaries
+
+## Architecture Overview
+
+- **Backend**: JacLang (OSP graph with emotions, triggers, activities)
+- **Walkers**: log_mood, weekly_trend
+- **Frontend 1**: Streamlit (user-facing UI)
+- **Frontend 2**: Jac-Client (mandatory Jaseci stack interface)
+- **LLM**: Used for trigger detection and empathetic responses
+ 643ff339 (Add Jac-Client frontend, clean legacy files, and document architecture)
 
 # **Overview**
 This project is based on Hackathon Project 5 (MindMate Harmony Space).  
