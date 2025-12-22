@@ -132,7 +132,7 @@ if not st.session_state.logged_in:
 
 # MAIN APP
 
-st.title(f"Welcome back, {st.session_state.user_name} 😊")
+st.title(f"Welcome Again, {st.session_state.user_name} 😊")
 st.markdown("**You are safe here. Let’s walk together.**")
 
 tool = st.selectbox(
