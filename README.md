@@ -59,4 +59,5 @@ AFYA-MIND tracks moods via screenings (PHQ-9, GAD-7, ARM-16, WERCAP), identifies
 - **GitHub Repository:** https://github.com/EricJ-2016/AFYA_MIND_AI_PROJECT  
 - **Live App on Streamlit:** https://afyamindaiproject-dwoadxep52evxo9q3jkkak.streamlit.app/  
 - **Demo Video:** https://drive.google.com/file/d/1pwvxev98ItNkxL1Wm21iQVNspBOSThOl/view?usp=sharing
+- **Word Doc:**https://drive.google.com/file/d/1NZzteUE3tb2U84GZUMYzLydwS59dV1FL/view?usp=sharing 
   
