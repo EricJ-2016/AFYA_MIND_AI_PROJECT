@@ -1,6 +1,6 @@
 # AFYA-MIND – Project 5: MindMate Harmony Space
 
- HEAD
+
 # **Requirements**
 - Jac core + OSP graph + byLLM + Jac Client + spawn()
 - 3 agents: Logger → Analyzer → Suggester
